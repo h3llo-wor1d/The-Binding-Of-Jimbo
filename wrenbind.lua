@@ -12,6 +12,8 @@
 ----------------------------------------------
 ------------MOD CODE -------------------------
 local mod_path = "" .. SMODS.current_mod.path
+Wrenbind_config = SMODS.current_mod.config
+
 WrenBind = {
     logic = {},
     can_roll = {
@@ -22,6 +24,9 @@ WrenBind = {
     dice = {
         "j_wrenbind_d20",
         "j_wrenbind_d4"
+    },
+    is_active = {
+        polyphemus=true
     }
 }
 
@@ -271,73 +276,41 @@ function G.FUNCS.nothing(e)
     return true
 end
 
-Wrenbind_config = SMODS.current_mod.config
-
-local wrenbindTabs = function() return {
-	{
-		label = "Isaac Settings",
-		chosen = true,
-		tab_definition_function = function()
-			wren_nodes = {
-                {
-                    n=G.UIT.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, 
-                    nodes={
-                        create_option_cycle({
-                            label="Choose Your Isaac Save File",
-                            min=1, 
-                            max=3, 
-                            ref_table=Wrenbind_config, 
-                            ref_value="IsaacSaveFileNum", 
-                            options={1,2,3}
-                        }),
-                        create_option_cycle({
-                            label="Which Version Are You Playing?", 
-                            min=1,
-                            max=3, 
-                            ref_table=Wrenbind_config, 
-                            ref_value="IsaacVersion", 
-                            options={
-                                "Repentance+",
-                                "Repentance",
-                                "Afterbirth+",
-                                "Afterbirth",
-                                "Rebirth"
-                            }
-                        })
-                    }
-                }
-			}
-			return {
-				n = G.UIT.ROOT,
-				config = {
-					emboss = 0.05,
-					minh = 6,
-					r = 0.1,
-					minw = 10,
-					align = "cm",
-					padding = 0.2,
-					colour = G.C.BLACK,
-				},
-				nodes = wren_nodes,
-			}
-		end,
-	}
-} end
-
-G.FUNCS.wrenbindMenu = function(e)
-	local tabs = create_tabs({
-		snap_to_nav = true,
-		tabs = wrenbindTabs(),
-	})
-	G.FUNCS.overlay_menu({
-		definition = create_UIBox_generic_options({
-			back_func = "options",
-			contents = { tabs },
-		}),
-		config = { offset = { x = 0, y = 10 } },
-	})
+G.FUNCS.cycle_update = function(args)
+    args = args or {}
+    if args.cycle_config and args.cycle_config.ref_table and args.cycle_config.ref_value then
+        args.cycle_config.ref_table[args.cycle_config.ref_value] = args.to_key
+    end
 end
 
-SMODS.current_mod.extra_tabs = wrenbindTabs
+SMODS.current_mod.config_tab = function()
+    return {
+        n=G.UIT.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, 
+        nodes={
+            create_option_cycle({
+                label="Which Version Are You Playing?", 
+                ref_table=Wrenbind_config, 
+                ref_value="IsaacVersion", 
+                options={
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                },
+                current_option=Wrenbind_config.IsaacVersion,
+                callback="cycle_update"
+            }),
+            create_option_cycle({
+                label="Choose Your Isaac Save File",
+                ref_table=Wrenbind_config, 
+                current_option=Wrenbind_config.IsaacSaveFileNum,
+                ref_value="IsaacSaveFileNum", 
+                options={1,2,3},
+                callback="cycle_update"
+            }),
+        }
+    }
+end
 ----------------------------------------------
 ------------MOD CODE END----------------------

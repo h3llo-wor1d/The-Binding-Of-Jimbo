@@ -1,4 +1,4 @@
 return {
     ["IsaacSaveFileNum"] = 1,
-    ["IsaacVersion"] = "Repentance+"
+    ["IsaacVersion"] = 1
 }
