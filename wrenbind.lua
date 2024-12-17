@@ -143,6 +143,8 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 	end
 end
 --[[
+
+--[[
 if os == "Windows" then
     -- logic to find isaac directory (i had multiple users on my pc so i'm trying to guesstimate the user's id)
     local users = NFS.getDirectoryItems("C:\\Program Files (x86)\\Steam\\userdata\\")
@@ -157,7 +159,6 @@ if os == "Windows" then
     end
 end
 ]]
-
 
 if steamid ~= nil then
     -- only register these jokers and data if you have isaac on steam
