@@ -142,7 +142,6 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 		SMODS[set](objs[i])
 	end
 end
---[[
 
 --[[
 if os == "Windows" then
