@@ -27,6 +27,9 @@ WrenBind = {
     },
     is_active = {
         polyphemus=true
+    },
+    globals = {
+        cursed_eye = {count = 0}
     }
 }
 
@@ -139,7 +142,7 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 		SMODS[set](objs[i])
 	end
 end
-[[
+--[[
 if os == "Windows" then
     -- logic to find isaac directory (i had multiple users on my pc so i'm trying to guesstimate the user's id)
     local users = NFS.getDirectoryItems("C:\\Program Files (x86)\\Steam\\userdata\\")
