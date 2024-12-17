@@ -282,7 +282,7 @@ G.FUNCS.cycle_update = function(args)
         args.cycle_config.ref_table[args.cycle_config.ref_value] = args.to_key
     end
 end
-
+-- Is not working? I don't know why...
 SMODS.current_mod.config_tab = function()
     return {
         n=G.UIT.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, 
