@@ -5,7 +5,7 @@
 --- MOD_AUTHOR: [Wrench]
 --- MOD_DESCRIPTION: Adds 50+ new jokers and items based on the Binding Of Isaac by Edmund McMillen
 --- BADGE_COLOUR: 708b91
---- DEPENDENCIES: [Talisman>=2.0.0-beta8, Steamodded>=1.0.0~ALPHA-0917a]
+--- DEPENDENCIES: [Steamodded>=1.0.0~ALPHA-0917a]
 --- VERSION: 0.0.1a
 --- PRIORITY: 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
 
@@ -139,7 +139,7 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 		SMODS[set](objs[i])
 	end
 end
-
+[[
 if os == "Windows" then
     -- logic to find isaac directory (i had multiple users on my pc so i'm trying to guesstimate the user's id)
     local users = NFS.getDirectoryItems("C:\\Program Files (x86)\\Steam\\userdata\\")
@@ -153,6 +153,8 @@ if os == "Windows" then
         end
     end
 end
+]]
+
 
 if steamid ~= nil then
     -- only register these jokers and data if you have isaac on steam
