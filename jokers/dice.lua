@@ -9,7 +9,8 @@ local D20 = {
             "Needs {C:attention}4 Charges{}"
         }
     },
-    config = {extra = {charges = 4, can_roll = true}},
+    -- todo: set charge_max and replace can_roll with if charges > charge_max and then subtract charges by charge_max for battery cases
+    config = {extra = {charges = 4, can_roll = true}}, 
     atlas = "atlasone",
     pos = { x = 1, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"} },
     soul_pos = { x = 2, y = 0 },
