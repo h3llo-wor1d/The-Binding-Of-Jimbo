@@ -9,21 +9,21 @@ local Polyphemus = {
         }
     },
     atlas = "atlasone",
-    pos = { x = 0, y = 1 },
-    soul_pos = {x=1, y=1},
+    config = {extra = {active = false}},
+    pos = { x = 0, y = 0 },
     rarity = "wrenbind_q4",
     cost = 20,
     calculate = function(self, card, context)
-        if context.cardarea == G.jokers and context.after and not WrenBind.is_active.polyphemus then
-            WrenBind.is_active.polyphemus = true
+        if context.cardarea == G.jokers and context.after and not card.ability.extra.active then
+            card.ability.extra.active = true
         end
         if 
             context.cardarea == G.jokers
             and not context.before
             and not context.after
-            and WrenBind.is_active.polyphemus
+            and card.ability.extra.active
         then
-            WrenBind.is_active.polyphemus = false
+            card.ability.extra.active = false
             hand_chips = hand_chips^1.50
             mult = mult^1.50
             SMODS.eval_this(card, {message = "x2?", colour = G.C.MULT})

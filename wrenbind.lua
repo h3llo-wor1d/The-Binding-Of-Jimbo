@@ -14,22 +14,7 @@
 local mod_path = "" .. SMODS.current_mod.path
 Wrenbind_config = SMODS.current_mod.config
 
-WrenBind = {
-    logic = {},
-    charges = {
-        d20 = 0,
-        d4 = 0,
-        d6 = 0
-    },
-    dice = {
-        "j_wrenbind_d20",
-        "j_wrenbind_d4",
-        "j_wrenbind_d6"
-    },
-    is_active = {
-        polyphemus=true
-    }
-}
+WrenBind = {util = nil}
 
 SMODS.Sound:register_global()
 
@@ -77,51 +62,52 @@ SMODS.Rarity {
     pools = {["Joker"] = true}
 }
 
---[[ scrapped for now- desync issues
-SMODS.Sound {
-    key = "music_main",
-    path = "main.ogg",
-    replace = "music1",
-    pitch = 1,
-    sync = true
-}
-
-SMODS.Sound {
-    key = "music_arcana",
-    path = "arcana.ogg",
-    replace = "music2",
-    pitch = 1,
-    sync = true
-}
-SMODS.Sound {
-    key = "music_celestial",
-    path = "celestial.ogg",
-    replace = "music3",
-    pitch = 1,
-    sync = true
-}
-SMODS.Sound {
-    key = "music_shop",
-    path = "shop.ogg",
-    replace = "music4",
-    pitch = 1,
-    sync = true
-}
-SMODS.Sound {
-    key = "music_boss",
-    path = "boss.ogg",
-    replace = "music5",
-    pitch = 1,
-    sync = true
-}
-]]
-
 local irp = SMODS.load_file("api/isaac.lua")() -- todo: load everything into an array that can be read instead of individually loading modules
 WrenBind.util = SMODS.load_file("api/util.lua")()
 
 local os = love.system.getOS()
 local steamid = nil
 
+local old_createuiblind = create_UIBox_blind_select
+function create_UIBox_blind_select(skip_ani)
+    if skip_ani then
+        G.blind_prompt_box = UIBox{
+            definition =
+              {n=G.UIT.ROOT, config = {align = 'cm', colour = G.C.CLEAR, padding = 0.2}, nodes={
+                {n=G.UIT.R, config={align = "cm"}, nodes={
+                  {n=G.UIT.O, config={object = DynaText({string = localize('ph_choose_blind_1'), colours = {G.C.WHITE}, shadow = true, scale = 0.6, maxw = 5, silent=true}), id = 'prompt_dynatext1'}}
+                }},
+                {n=G.UIT.R, config={align = "cm"}, nodes={
+                  {n=G.UIT.O, config={object = DynaText({string = localize('ph_choose_blind_2'), colours = {G.C.WHITE}, shadow = true, scale = 0.7, maxw = 5, silent = true}), id = 'prompt_dynatext2'}}
+                }},
+                (G.GAME.used_vouchers["v_retcon"] or G.GAME.used_vouchers["v_directors_cut"]) and
+                UIBox_button({label = {localize('b_reroll_boss'), localize('$')..'10'}, button = "reroll_boss", func = 'reroll_boss_button'}) or nil
+              }},
+            config = {align="cm", offset = {x=0,y=0},major = G.HUD:get_UIE_by_ID('row_blind'), bond = 'Weak'}
+        }
+    
+        local width = G.hand.T.w
+        G.GAME.blind_on_deck = 
+        not (G.GAME.round_resets.blind_states.Small == 'Defeated' or G.GAME.round_resets.blind_states.Small == 'Skipped' or G.GAME.round_resets.blind_states.Small == 'Hide') and 'Small' or
+        not (G.GAME.round_resets.blind_states.Big == 'Defeated' or G.GAME.round_resets.blind_states.Big == 'Skipped'or G.GAME.round_resets.blind_states.Big == 'Hide') and 'Big' or 
+        'Boss'
+        
+        G.blind_select_opts = {}
+        G.blind_select_opts.small = G.GAME.round_resets.blind_states['Small'] ~= 'Hide' and UIBox{definition = {n=G.UIT.ROOT, config={align = "cm", colour = G.C.CLEAR}, nodes={UIBox_dyn_container({create_UIBox_blind_choice('Small')},false,get_blind_main_colour('Small'))}}, config = {align="bmi", offset = {x=0,y=0}}} or nil
+        G.blind_select_opts.big = G.GAME.round_resets.blind_states['Big'] ~= 'Hide' and UIBox{definition = {n=G.UIT.ROOT, config={align = "cm", colour = G.C.CLEAR}, nodes={UIBox_dyn_container({create_UIBox_blind_choice('Big')},false,get_blind_main_colour('Big'))}}, config = {align="bmi", offset = {x=0,y=0}}} or nil
+        G.blind_select_opts.boss = G.GAME.round_resets.blind_states['Boss'] ~= 'Hide' and UIBox{definition = {n=G.UIT.ROOT, config={align = "cm", colour = G.C.CLEAR}, nodes={UIBox_dyn_container({create_UIBox_blind_choice('Boss')},false,get_blind_main_colour('Boss'), mix_colours(G.C.BLACK, get_blind_main_colour('Boss'), 0.8))}}, config = {align="bmi", offset = {x=0,y=0}}} or nil
+        
+        local t = {n=G.UIT.ROOT, config = {align = 'tm',minw = width, r = 0.15, colour = G.C.CLEAR}, nodes={
+        {n=G.UIT.R, config={align = "cm", padding = 0.5}, nodes={
+            G.GAME.round_resets.blind_states['Small'] ~= 'Hide' and {n=G.UIT.O, config={align = "cm", object = G.blind_select_opts.small}} or nil,
+            G.GAME.round_resets.blind_states['Big'] ~= 'Hide' and {n=G.UIT.O, config={align = "cm", object = G.blind_select_opts.big}} or nil,
+            G.GAME.round_resets.blind_states['Boss'] ~= 'Hide' and {n=G.UIT.O, config={align = "cm", object = G.blind_select_opts.boss}} or nil,
+        }}
+        }}
+        return t 
+    end
+    return old_createuiblind()
+end
 --[[
     "Borrowed" from Cryptid
 ]]
@@ -137,12 +123,6 @@ for _, file in ipairs(files) do
 		local curr_obj = f()
         if curr_obj.init then
             curr_obj:init()
-        end
-        if curr_obj.logic then
-            for key, val in pairs(curr_obj.logic) do
-                print("Initialized logic for "..key)
-                WrenBind.logic[key] = val
-            end
         end
         if not curr_obj.items then
             print("Warning: " .. file .. " has no items")
@@ -244,7 +224,7 @@ function G.UIDEF.use_and_sell_buttons(card)
     if
         card.area
         and card.area == G.jokers
-        and WrenBind.util.has_value(WrenBind.dice, card.config.center.key)
+        and card.ability.extra and card.ability.extra.charges
     then
         -- borrowed from cryptid with permission!
         local use = {
@@ -271,7 +251,7 @@ function G.UIDEF.use_and_sell_buttons(card)
                         {
                             n = G.UIT.T,
                             config = {
-                                text = "Roll",
+                                text = "Use!",
                                 colour = G.C.UI.TEXT_LIGHT,
                                 scale = 0.3,
                                 shadow = true,
@@ -295,6 +275,8 @@ function G.UIDEF.use_and_sell_buttons(card)
     return m
 end
 
+-- overrides borrowed with permission from aura to allow for the charge sprites to be drawn over the jokers.
+-- todo: these are not drawn over joker shaders for some reason?
 local css = Card.set_sprites
 function Card:set_sprites(c, f)
     css(self, c,f)
@@ -405,8 +387,7 @@ function G.FUNCS.can_roll(e)
 end
 
 function G.FUNCS.roll(e)
-    local d = WrenBind.util.split(e.config.ref_table.ability.name, "_")
-    WrenBind.logic[d[#d]](e.config.ref_table)
+    e.config.ref_table.config.center.use(e.config.ref_table)
     return true
 end
 
