@@ -16,14 +16,15 @@ Wrenbind_config = SMODS.current_mod.config
 
 WrenBind = {
     logic = {},
-    can_roll = {
-        d20 = true,
-        d6 = true,
-        d4 = true
+    charges = {
+        d20 = 0,
+        d4 = 0,
+        d6 = 0
     },
     dice = {
         "j_wrenbind_d20",
-        "j_wrenbind_d4"
+        "j_wrenbind_d4",
+        "j_wrenbind_d6"
     },
     is_active = {
         polyphemus=true
@@ -41,6 +42,33 @@ SMODS.Atlas({
 	px = 71,
 	py = 95,
 }):register()
+
+SMODS.Atlas({
+	key = "charge",
+	path = "atlascharge.png",
+	px = 71,
+	py = 95,
+}):register()
+
+SMODS.Rarity {
+    key = "q4",
+    loc_txt = {
+        name = "Quality 4"
+    },
+    badge_colour = HEX('ffd100'),
+    default_weight = 0.075,
+    pools = {["Joker"] = true},
+}
+
+SMODS.Rarity {
+    key = "q0",
+    loc_txt = {
+        name = "Quality 0"
+    },
+    default_weight=0.1,
+    badge_colour = HEX('c2c2c2'),
+    pools = {["Joker"] = true}
+}
 
 --[[ scrapped for now- desync issues
 SMODS.Sound {
@@ -223,7 +251,7 @@ function G.UIDEF.use_and_sell_buttons(card)
                         align = "cr",
                         maxw = 1.25,
                         padding = 0.1,
-                        r = 0.05,
+                        r = 0.2,
                         hover = true,
                         shadow = true,
                         colour = G.C.UI.BACKGROUND_INACTIVE,
@@ -241,9 +269,9 @@ function G.UIDEF.use_and_sell_buttons(card)
                                 scale = 0.3,
                                 shadow = true,
                             },
-                        },
+                        }
                     },
-                },
+                }
             },
         }
         local n = m.nodes[1]
@@ -260,9 +288,110 @@ function G.UIDEF.use_and_sell_buttons(card)
     return m
 end
 
+local css = Card.set_sprites
+function Card:set_sprites(c, f)
+    css(self, c,f)
+    if self.config.center and self.config.center.pos and self.config.center.pos.extra and self.config.center.pos.extra.atlas then
+        if not self.children.front then
+            self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[self.config.center.pos.extra.atlas], self.config.center.pos)
+            self.children.front.states.hover = self.states.hover
+            self.children.front.states.click = self.states.click
+            self.children.front.states.drag = self.states.drag
+            self.children.front.states.collide.can = false
+            self.children.front:set_role({major = self, role_type = 'Glued', draw_major = self})
+        else
+            self.children.front:set_sprite_pos(self.config.center.pos.extra)
+        end
+    end
+end
+
+local cd = Card.draw
+function Card:draw(layer)
+    if self.config and self.config.center and self.config.center.pos and self.config.center.pos.extra and self.config.center.pos.extra.atlas then self:set_sprites() end
+    cd(self,layer)
+end
+
+local cl = Card.load
+
+function Card:load(cardTable, other_card)
+    local scale = 1
+    self.config = {}
+    self.config.center_key = cardTable.save_fields.center
+    self.config.center = G.P_CENTERS[self.config.center_key]
+    self.params = cardTable.params
+    self.sticker_run = nil
+
+    local H = G.CARD_H
+    local W = G.CARD_W
+    if self.config.center.name == "Half Joker" then 
+        self.T.h = H*scale/1.7*scale
+        self.T.w = W*scale
+    elseif self.config.center.name == "Wee Joker" then 
+        self.T.h = H*scale*0.7*scale
+        self.T.w = W*scale*0.7*scale
+    elseif self.config.center.name == "Photograph" then 
+        self.T.h = H*scale/1.2*scale
+        self.T.w = W*scale
+    elseif self.config.center.name == "Square Joker" then
+
+        H = W 
+        self.T.h = H*scale
+        self.T.w = W*scale
+    elseif self.config.center.set == 'Booster' then 
+        self.T.h = H*1.27
+        self.T.w = W*1.27
+    else
+        self.T.h = H*scale
+        self.T.w = W*scale
+    end
+    self.VT.h = self.T.H
+    self.VT.w = self.T.w
+
+    self.config.card_key = cardTable.save_fields.card
+    self.config.card = G.P_CARDS[self.config.card_key]
+    self.no_ui = cardTable.no_ui
+    self.base_cost = cardTable.base_cost
+    self.extra_cost = cardTable.extra_cost
+    self.cost = cardTable.cost
+    self.sell_cost = cardTable.sell_cost
+    self.facing = cardTable.facing
+    self.sprite_facing = cardTable.sprite_facing
+    self.flipping = cardTable.flipping
+    self.highlighted = cardTable.highlighted
+    self.debuff = cardTable.debuff
+    self.rank = cardTable.rank
+    self.added_to_deck = cardTable.added_to_deck
+    self.label = cardTable.label
+    self.playing_card = cardTable.playing_card
+    self.base = cardTable.base
+    self.sort_id = cardTable.sort_id
+    self.bypass_discovery_center = cardTable.bypass_discovery_center
+    self.bypass_discovery_ui = cardTable.bypass_discovery_ui
+    self.bypass_lock = cardTable.bypass_lock
+
+    
+
+    self.ability = cardTable.ability
+    self.pinned = cardTable.pinned
+    self.edition = cardTable.edition
+    self.seal = cardTable.seal
+
+    if WrenBind.util.has_value(WrenBind.dice, self.config.center.key) then
+        self.config.center.pos.extra.x = self.ability.extra.charges
+    end
+
+    remove_all(self.children)
+    self.children = {}
+    self.children.shadow = Moveable(0, 0, 0, 0)
+
+    self:set_sprites(self.config.center, self.config.card)
+end
+
+
+
+
 function G.FUNCS.can_roll(e)
-    local d = WrenBind.util.split(e.config.ref_table.ability.name, "_")
-    if WrenBind.can_roll[d[#d]] then
+    if e.config.ref_table.ability.extra.can_roll then
         e.config.colour = G.C.BLUE
         e.config.button = "roll"
         return

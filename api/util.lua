@@ -39,6 +39,24 @@ local function alert_dice(card, message, duration)
     })
 end
 
+local charges = {
+    ["6"]= 1,
+    ["4"] = 2,
+    ["2"]= 3,
+    ["1"] = 4
+}
+
+local function draw_charge(card, hold, charge) 
+    card.children.charge = Sprite(card.T.x, card.T.y, card.T.w, card.T.h, G.ASSET_ATLAS['wrenbind_charge'], {x=charge, y=charges[tostring(hold)]})
+    card.children.charge.states.hover = card.states.hover
+    card.children.charge.states.click = card.states.click
+    card.children.charge.states.drag = card.states.drag
+    card.children.charge.states.collide.can = false
+    card.children.charge:set_role({major = card, role_type = 'Glued', draw_major = card})
+    card.children.charge:draw()
+    print("i should've drawn by now...")
+end
+
 local foley_num = {
     dice = 5
 }
@@ -51,6 +69,7 @@ return {
     split = split,
     has_value = has_value,
     alert_dice = alert_dice,
-    play_foley = play_foley
+    play_foley = play_foley,
+    draw_charge = draw_charge
 }
  

@@ -5,13 +5,13 @@ local Polyphemus = {
     loc_txt = {
         name = "Polyphemus",
         text = {
-            "{C:Mult}^2{} Mult"
+            "{C:Mult}\"Double\"{} Mult"
         }
     },
     atlas = "atlasone",
     pos = { x = 0, y = 1 },
     soul_pos = {x=1, y=1},
-    rarity = 3,
+    rarity = "wrenbind_q4",
     cost = 20,
     calculate = function(self, card, context)
         if context.cardarea == G.jokers and context.after and not WrenBind.is_active.polyphemus then
@@ -24,9 +24,9 @@ local Polyphemus = {
             and WrenBind.is_active.polyphemus
         then
             WrenBind.is_active.polyphemus = false
-            hand_chips = hand_chips*hand_chips
-            mult = mult*mult
-            SMODS.eval_this(card, {message = "^2", colour = G.C.MULT})
+            hand_chips = hand_chips^1.50
+            mult = mult^1.50
+            SMODS.eval_this(card, {message = "x2?", colour = G.C.MULT})
         end   
     end
 }
