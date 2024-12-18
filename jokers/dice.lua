@@ -1,3 +1,12 @@
+local function is_battery()
+    for i=1, #G.jokers.cards do
+        if G.jokers.cards[i].config.center.name == "wrenbind_thebattery" then
+            return true
+        end
+    end
+    return false
+end
+
 local D20 = {
     object_type = "Joker",
     name = "wrenbind_d20",
@@ -6,11 +15,11 @@ local D20 = {
         name = "D20",
         text = {
             "Rerolls all {C:attention}Consumables{}",
-            "Needs {C:attention}4 Charges{}"
+            "Needs {C:attention}4 Charges{} to use"
         }
     },
     -- todo: set charge_max and replace can_roll with if charges > charge_max and then subtract charges by charge_max for battery cases
-    config = {extra = {charges = 4, can_roll = true}}, 
+    config = {extra = {charges = 4, charge_max = 4}}, 
     atlas = "atlasone",
     pos = { x = 1, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"} },
     soul_pos = { x = 2, y = 0 },
@@ -20,18 +29,32 @@ local D20 = {
         if context.end_of_round and not context.repetition and not context.individual and not context.blueprint then
             local charges = card.ability.extra.charges
             charges = charges + 1
-            if charges < 4 then
-                play_sound("wrenbind_active_charge", 1, 1)
-                card.ability.extra.charges = charges
-                self.pos.extra.x = charges
-            elseif charges ~= 5 then
-                play_sound("wrenbind_active_charged", 1, 1)
-                card.ability.extra.charges = 4
-                self.pos.extra.x = 4
-                card.ability.extra.can_roll = true
-                return {
-                    message = "Charged!"
-                }
+            if is_battery() then
+                if charges < 8 then
+                    play_sound("wrenbind_active_charge", 1, 1)
+                    card.ability.extra.charges = charges
+                    self.pos.extra.x = charges
+                elseif charges ~= 9 then
+                    play_sound("wrenbind_active_charged", 1, 1)
+                    card.ability.extra.charges = 8
+                    self.pos.extra.x = 8
+                    return {
+                        message = "Charged!"
+                    }
+                end
+            else
+                if charges < 4 then
+                    play_sound("wrenbind_active_charge", 1, 1)
+                    card.ability.extra.charges = charges
+                    self.pos.extra.x = charges
+                elseif charges ~= 5 then
+                    play_sound("wrenbind_active_charged", 1, 1)
+                    card.ability.extra.charges = 4
+                    self.pos.extra.x = 4
+                    return {
+                        message = "Charged!"
+                    }
+                end
             end
         end
     end
@@ -72,11 +95,11 @@ local D4 = {
         name = "D4",
         text = {
             "Rerolls all {C:attention}Jokers{}",
-            "Needs {C:attention}5 Charges{}"
+            "Needs {C:attention}5 Charges{} to use"
         }
     },
     atlas = "atlasone",
-    config = {extra = {charges = 5, can_roll = true}},
+    config = {extra = {charges = 5, charge_max = 5}},
     pos = { x = 4, y = 0, extra = {x = 5, y = 0, atlas="wrenbind_charge"} },
     soul_pos = { x = 5, y = 0 },
     rarity = "wrenbind_q4",
@@ -85,18 +108,33 @@ local D4 = {
         if context.end_of_round and not context.repetition and not context.individual and not context.blueprint then
             local charges = card.ability.extra.charges
             charges = charges + 1
-            if charges < 5 then
-                play_sound("wrenbind_active_charge", 1, 1)
-                card.ability.extra.charges = charges
-                self.pos.extra.x = charges
-            elseif charges ~= 6 then
-                play_sound("wrenbind_active_charged", 1, 1)
-                card.ability.extra.charges = 5
-                self.pos.extra.x = 5
-                card.ability.extra.can_roll = true
-                return {
-                    message = "Charged!"
-                }
+            if is_battery() then
+                if charges < 10 then
+                    play_sound("wrenbind_active_charge", 1, 1)
+                    card.ability.extra.charges = charges
+                    self.pos.extra.x = charges
+                elseif charges ~= 11 then
+                    play_sound("wrenbind_active_charged", 1, 1)
+                    card.ability.extra.charges = 10
+                    self.pos.extra.x = 10
+                    return {
+                        message = "Charged!"
+                    }
+                end
+                
+            else
+                if charges < 5 then
+                    play_sound("wrenbind_active_charge", 1, 1)
+                    card.ability.extra.charges = charges
+                    self.pos.extra.x = charges
+                elseif charges ~= 6 then
+                    play_sound("wrenbind_active_charged", 1, 1)
+                    card.ability.extra.charges = 5
+                    self.pos.extra.x = 5
+                    return {
+                        message = "Charged!"
+                    }
+                end
             end
         end
     end
@@ -110,8 +148,11 @@ return {
                 WrenBind.util.alert_dice(card, "Nothing to roll!", 0.65)
                 return true
             end
-            card.ability.extra.charges = 0
-            card.config.center.pos.extra.x = 0
+            local new_charges = card.ability.extra.charges-card.ability.extra.charge_max
+            print(new_charges)
+            print(#SMODS.find_card("thebattery"))
+            card.ability.extra.charges = new_charges
+            card.config.center.pos.extra.x = new_charges
             WrenBind.util.alert_dice(card, "Roll!", 0.75)
             WrenBind.util.play_foley("dice", 1)
             for i=1, #G.consumeables.cards do
@@ -139,15 +180,14 @@ return {
                 table.insert(G.consumeables.cards, i, table.remove(G.consumeables.cards,#G.consumeables.cards))
                 -- borrowed from my missingno mod
             end
-            card.ability.extra.can_roll = false
         end,
         d4 = function (card)
             if #G.jokers.cards-1 == 0 then
                 WrenBind.util.alert_dice(card, "Nothing to roll!", 0.65)
                 return true
             end
-            card.ability.extra.charges = 0
-            card.config.center.pos.extra.x = 0
+            card.ability.extra.charges = card.ability.extra.charges-card.ability.extra.charge_max
+            card.config.center.pos.extra.x = card.ability.extra.charges-card.ability.extra.charge_max
             WrenBind.util.alert_dice(card, "Roll!", 0.75)
             WrenBind.util.play_foley("dice", 1)
             local count = #G.jokers.cards

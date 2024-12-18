@@ -28,9 +28,6 @@ WrenBind = {
     },
     is_active = {
         polyphemus=true
-    },
-    globals = {
-        cursed_eye = {count = 0}
     }
 }
 
@@ -58,6 +55,16 @@ SMODS.Rarity {
     badge_colour = HEX('ffd100'),
     default_weight = 0.075,
     pools = {["Joker"] = true},
+}
+
+SMODS.Rarity {
+    key = "q2",
+    loc_txt = {
+        name = "Quality 2"
+    },
+    default_weight=0.095,
+    badge_colour = HEX('65d5ff'),
+    pools = {["Joker"] = true}
 }
 
 SMODS.Rarity {
@@ -387,11 +394,8 @@ function Card:load(cardTable, other_card)
     self:set_sprites(self.config.center, self.config.card)
 end
 
-
-
-
 function G.FUNCS.can_roll(e)
-    if e.config.ref_table.ability.extra.can_roll then
+    if e.config.ref_table.ability.extra.charges >= e.config.ref_table.ability.extra.charge_max then
         e.config.colour = G.C.BLUE
         e.config.button = "roll"
         return
