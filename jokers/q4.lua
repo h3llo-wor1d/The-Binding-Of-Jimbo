@@ -1,3 +1,97 @@
+local function gfuels()
+    local counter = 1
+    for i=1, #G.jokers.cards do
+        if G.jokers.cards[i].config.center.name == "wrenbind_gfuel" then
+            counter = counter + 1
+        end
+    end
+    return counter
+end
+
+local GFUEL_FLAVORS = {
+    "HUMOR UP!",
+    "G UP!",
+    "FASTER UP!",
+    "EXPLOSIONS UP!",
+    "AMBITION UP!",
+    "RESPECT UP!",
+    "GENEROSITY UP!",
+    "WHITE BLOOD CELLS UP!",
+    "MANA UP!",
+    "ENERGY UP!",
+    "RANK UP! REACHED RANK: ISAAC'S FACE",
+    "FEAR UP!",
+    "REACTION UP!",
+    "ACCEPTANCE UP!",
+    "ACIDITY UP!",
+    "THOU ART HERO!",
+    "VOLUME UP!",
+    "FAVOR UP!",
+    "SOUL UP!"
+}
+-- on 1, nothing happens
+    -- on 2, chips up, no mult down
+    -- on 3, huge chips up, mult is 1
+    -- on 4, mild mult up, chips way down (normalized)
+    -- on 5, mild mult up and mily chips up
+    -- on 6, chips WAY the fuck up and mult up <- loop start
+    -- on 7, chips WAY the fuck down (back to 5) and mult up <- loop end
+    -- global pitch up .15 per each gfuel
+
+local gf_eff = {
+    function(card, static) 
+        return {
+            Xmult_mod = card.ability.extra.perm_mult
+        }
+    end,
+    function(card, static)
+        return {
+            Xmult_mod = card.ability.extra.perm_mult,
+            chip_mod = 100*card.ability.extra.perm_mult
+        }
+    end,
+    function(card, static)
+        mult = (static and card.ability.extra.perm_mult*mult or 1)
+        return {
+            chip_mod = ((hand_chips*40)*card.ability.extra.perm_mult)-hand_chips
+        }
+    end,
+    function(card, static)
+        return {
+            chip_mod = 300*card.ability.extra.perm_mult,
+            Xmult_mod = card.ability.extra.perm_mult
+        }
+    end,
+    function(card, static)
+        return {
+            chip_mod = 200*card.ability.extra.perm_mult,
+            Xmult_mod = card.ability.extra.perm_mult
+        }
+    end,
+    function(card, static)
+        return {
+            chip_mod = ((hand_chips*60)*card.ability.extra.perm_mult) - hand_chips,
+            Xmult_mod = card.ability.extra.perm_mult
+        }
+    end,
+    function(card, static)
+        return {
+            chip_mod = 100*card.ability.extra.perm_mult,
+            Xmult_mod = card.ability.extra.perm_mult
+        }
+    end
+}
+local function calculate_gfuel(card)
+    local effect = (gfuels()-1 > 7 and true or gfuels()-1)
+    -- static mult ups
+    card.ability.extra.perm_mult = ((card.ability.extra.perm_mult^0.95)*1.4)+1
+
+    if type(effect) ~= "boolean" then
+        return gf_eff[effect](card)
+    else
+        return gf_eff[love.math.random(1,#gf_eff)](card, true)
+    end
+end
 local Polyphemus = {
     object_type = "Joker",
     name = "wrenbind_polyphemus",
@@ -10,7 +104,7 @@ local Polyphemus = {
     },
     atlas = "atlasone",
     config = {extra = {active = false}},
-    pos = { x = 0, y = 0 },
+    pos = { x = 0, y = 1 },
     rarity = "wrenbind_q4",
     cost = 20,
     calculate = function(self, card, context)
@@ -31,9 +125,71 @@ local Polyphemus = {
     end
 }
 
+local GFuel = {
+    object_type = "Joker",
+    name = "wrenbind_gfuel",
+    key = "gfuel",
+    loc_txt = {
+        name = "GFUEL",
+        text = {
+            "{C:attention}G FUELLLLLLLLLLLLLL{}",
+            "{C:red,s:0.8}#1#{}{}"
+        }
+    },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.flavor } }
+    end,
+    atlas = "atlasone",
+    pos = { x = 1, y = 1 },
+    soul_pos = {x = 2, y = 1},
+    rarity = "wrenbind_q4",
+    immutable = true,
+    config = {
+        eternal=true, 
+        extra = {id=0, flavor="G UP!", active=true, perm_mult=1}
+    },
+    cost = 20,
+    
+    add_to_deck = function(self, card, from_debuff)
+        if not from_debuff and G.STAGE == G.STAGES.RUN and not G.screenwipe then
+            card.ability.extra.flavor = GFUEL_FLAVORS[love.math.random(1,#GFUEL_FLAVORS)]
+            IS_GFUEL = true
+            local count = gfuels()
+            card.ability.extra.id = count
+            if count > 7 then
+                count = 7
+            end
+            play_sound("wrenbind_gfuel"..count)
+            card_eval_status_text(card, 'extra', nil, nil, nil, {message = card.ability.extra.flavor})
+        end
+    end,
+    calculate = function(self, card, context)
+        if card.ability.extra.id == 1 then
+            if context.cardarea == G.jokers and context.after and not card.ability.extra.active then
+                card.ability.extra.active = true
+            end
+            if context.joker_main then
+                card.ability.extra.active = false
+                local calc = calculate_gfuel(card, effect)
+                calc.message = "GFUEL!"
+                return calc
+            end
+            if context.end_of_round and not context.game_over and not context.repetition and not context.blueprint and not context.individual then
+                play_sound("wrenbind_gfexplosion"..(gfuels() > 4 and 4 or gfuels()), 1, 1)
+            end
+            if G.GAME.blind.boss and not context.game_over and context.end_of_round and not context.repetition and not context.blueprint and not context.individual then
+                local c = copy_card(card)
+                c:add_to_deck()
+                G.jokers:emplace(c)
+            end  
+        end   
+    end
+}
+
 return {
     name = "Quality 4 Jokers",
     items = {
-        Polyphemus
+        Polyphemus,
+        GFuel
     }
 }

@@ -16,6 +16,9 @@ Wrenbind_config = SMODS.current_mod.config
 
 WrenBind = {util = nil}
 
+IS_GFUEL = false
+
+
 SMODS.Sound:register_global()
 
 SMODS.Atlas({
@@ -224,7 +227,7 @@ function G.UIDEF.use_and_sell_buttons(card)
     if
         card.area
         and card.area == G.jokers
-        and card.ability.extra and card.ability.extra.charges
+        and card.ability.extra and type(card.ability.extra) == "table" and card.ability.extra.charges
     then
         -- borrowed from cryptid with permission!
         local use = {
