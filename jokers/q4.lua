@@ -29,24 +29,16 @@ local GFUEL_FLAVORS = {
     "FAVOR UP!",
     "SOUL UP!"
 }
--- on 1, nothing happens
-    -- on 2, chips up, no mult down
-    -- on 3, huge chips up, mult is 1
-    -- on 4, mild mult up, chips way down (normalized)
-    -- on 5, mild mult up and mily chips up
-    -- on 6, chips WAY the fuck up and mult up <- loop start
-    -- on 7, chips WAY the fuck down (back to 5) and mult up <- loop end
-    -- global pitch up .15 per each gfuel
 
 local gf_eff = {
     function(card, static) 
         return {
-            Xmult_mod = card.ability.extra.perm_mult
+            x_mult = card.ability.extra.perm_mult
         }
     end,
     function(card, static)
         return {
-            Xmult_mod = card.ability.extra.perm_mult,
+            x_mult = card.ability.extra.perm_mult,
             chip_mod = 100*card.ability.extra.perm_mult
         }
     end,
@@ -59,25 +51,25 @@ local gf_eff = {
     function(card, static)
         return {
             chip_mod = 300*card.ability.extra.perm_mult,
-            Xmult_mod = card.ability.extra.perm_mult
+            x_mult = card.ability.extra.perm_mult
         }
     end,
     function(card, static)
         return {
             chip_mod = 200*card.ability.extra.perm_mult,
-            Xmult_mod = card.ability.extra.perm_mult
+            x_mult = card.ability.extra.perm_mult
         }
     end,
     function(card, static)
         return {
             chip_mod = ((hand_chips*60)*card.ability.extra.perm_mult) - hand_chips,
-            Xmult_mod = card.ability.extra.perm_mult
+            x_mult = card.ability.extra.perm_mult
         }
     end,
     function(card, static)
         return {
             chip_mod = 100*card.ability.extra.perm_mult,
-            Xmult_mod = card.ability.extra.perm_mult
+            x_mult = card.ability.extra.perm_mult
         }
     end
 }
@@ -122,6 +114,35 @@ local Polyphemus = {
             mult = mult^1.50
             SMODS.eval_this(card, {message = "x2?", colour = G.C.MULT})
         end   
+    end
+}
+
+local Brimstone = {
+    object_type = "Joker",
+    name = "wrenbind_brimstone",
+    key = "brimstone",
+    loc_txt = {
+        name = "Brimstone",
+        text = {
+            "\"Blood laser barrage\""
+        }
+    },
+    atlas = "atlasone",
+    pos = { x = 0, y = 0 },
+    rarity = "wrenbind_q4",
+    config = {extra = {count = -1}},
+    cost = 30,
+    calculate = function(self, card, context)
+        if context.cardarea == G.jokers and context.after then
+            card.ability.extra.count = -1
+        end
+        if context.individual and context.cardarea == G.play then
+            card.ability.extra.count = card.ability.extra.count + 1
+            return {
+                x_mult = 6-card.ability.extra.count,
+                card = context.other_card
+            }
+        end 
     end
 }
 
@@ -190,6 +211,7 @@ return {
     name = "Quality 4 Jokers",
     items = {
         Polyphemus,
-        GFuel
+        GFuel,
+        Brimstone
     }
 }

@@ -11,7 +11,7 @@
 
 ----------------------------------------------
 ------------MOD CODE -------------------------
-local mod_path = "" .. SMODS.current_mod.path
+local mod_path = SMODS.current_mod.path:gsub("/", "\\"):gsub(love.filesystem.getWorkingDirectory(), "")
 Wrenbind_config = SMODS.current_mod.config
 
 WrenBind = {util = nil}
@@ -43,6 +43,16 @@ SMODS.Rarity {
     badge_colour = HEX('ffd100'),
     default_weight = 0.075,
     pools = {["Joker"] = true},
+}
+
+SMODS.Rarity {
+    key = "q3",
+    loc_txt = {
+        name = "Quality 3"
+    },
+    default_weight=0.085,
+    badge_colour = HEX('ff54ec'),
+    pools = {["Joker"] = true}
 }
 
 SMODS.Rarity {
@@ -111,10 +121,30 @@ function create_UIBox_blind_select(skip_ani)
     end
     return old_createuiblind()
 end
+
+--[[ currently not working, will be implemented in future versions
+local old_desc = desc_from_rows
+function desc_from_rows(desc_nodes, empty, maxw)
+    local t = {}
+    local test = desc_nodes[1]and desc_nodes[1][1] and desc_nodes[1][1].config.text
+    if test:find("^wrenbind_") == nil then return old_desc(desc_nodes, empty, maxw) end
+    print("WRENBIND FOUND! CHANGING FONT TO TEAMMEAT")
+    desc_nodes[1][1].config.text = desc_nodes[1][1].config.text:gsub("^wrenbind_", '')
+    for k, v in ipairs(desc_nodes) do
+        t[#t+1] = {n=G.UIT.R, config={align = "cm", maxw = maxw}, nodes=v}
+    end
+    return {n=G.UIT.R, config={align = "cm", colour = empty and G.C.CLEAR or G.C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
+        {n=G.UIT.R, config={align = "cm", padding = 0.03}, nodes={
+            object = {DynaText({string = desc_nodes[1][1].config.text, font = WrenBind.TEAMMEAT})}
+        }}
+    }}
+    
+end
+]]
+
 --[[
     "Borrowed" from Cryptid
 ]]
-
 local files = NFS.getDirectoryItems(mod_path .. "jokers")
 WrenBind.obj_buffer = {}
 for _, file in ipairs(files) do
