@@ -84,6 +84,7 @@ local function calculate_gfuel(card)
         return gf_eff[love.math.random(1,#gf_eff)](card, true)
     end
 end
+
 local Polyphemus = {
     object_type = "Joker",
     name = "wrenbind_polyphemus",
@@ -91,7 +92,7 @@ local Polyphemus = {
     loc_txt = {
         name = "Polyphemus",
         text = {
-            "{C:Mult}\"Double\"{} Mult"
+            "\"Mega Mult\""
         }
     },
     atlas = "atlasone",
@@ -153,8 +154,7 @@ local GFuel = {
     loc_txt = {
         name = "GFUEL",
         text = {
-            "{C:attention}G FUELLLLLLLLLLLLLL{}",
-            "{C:red,s:0.8}#1#{}{}"
+            "#1#"
         }
     },
     loc_vars = function(self, info_queue, card)

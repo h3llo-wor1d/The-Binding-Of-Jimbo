@@ -52,8 +52,7 @@ local D12 = {
     loc_txt = {
         name = "D12",
         text = {
-            "Rerolls all {C:attention}Skip Tags{}",
-            "Needs {C:attention}3 charges{} to use"
+            "\"Rerolls Tags\""
         }
     },
     config = {extra = {charges = 3, charge_max = 3}}, 
@@ -83,8 +82,7 @@ local D20 = {
     loc_txt = {
         name = "D20",
         text = {
-            "Rerolls all {C:attention}Consumables{}",
-            "Needs {C:attention}4 Charges{} to use"
+            "\"Reroll The Basics\""
         }
     },
     -- todo: set charge_max and replace can_roll with if charges > charge_max and then subtract charges by charge_max for battery cases
@@ -172,8 +170,7 @@ local D4 = {
     loc_txt = {
         name = "D4",
         text = {
-            "Rerolls all {C:attention}Jokers{}",
-            "Needs {C:attention}5 Charges{} to use"
+            "\"Reroll Into Something Else\""
         }
     },
     atlas = "atlasone",

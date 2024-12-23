@@ -6,7 +6,7 @@ local TheBattery = {
     loc_txt={
         name="The Battery",
         text = {
-            "All {C:attention}Active Jokers{} may be charged twice."
+            "\"Stores Energy\""
         }
     },
     atlas = "atlasone",
