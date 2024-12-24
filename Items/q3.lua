@@ -11,7 +11,7 @@ local CoalLump = {
     atlas = "atlasone",
     rarity = "wrenbind_q3",
     config = {extra = {count = 0}},
-    pos = { x = 0, y = 0 },
+    pos = { x = 7, y = 0 },
     cost = 16,
     calculate = function(self, card, context)
         if context.cardarea == G.jokers and context.after then

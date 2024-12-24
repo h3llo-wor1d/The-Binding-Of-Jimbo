@@ -17,6 +17,25 @@ local function split(pString, pPattern)
     return Table
 end
 
+local function scramble(min, max)
+    local numbers = {}
+    local scrambled = {}
+
+    for i = min, max do
+        table.insert(numbers, i)
+    end
+
+    math.randomseed(os.time())
+
+    while #numbers > 0 do
+        local index = math.random(#numbers)
+        table.insert(scrambled, numbers[index])
+        table.remove(numbers, index)
+    end
+
+    return scrambled
+end
+
 local function reroll_tags ()
     G.GAME.round_resets.blind_tags.Small = get_next_tag_key()
     G.GAME.round_resets.blind_tags.Big = get_next_tag_key()
@@ -69,6 +88,7 @@ return {
     has_value = has_value,
     alert_dice = alert_dice,
     play_foley = play_foley,
-    reroll_tags = reroll_tags
+    reroll_tags = reroll_tags,
+    scramble = scramble
 }
  

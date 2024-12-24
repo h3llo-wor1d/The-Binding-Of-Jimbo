@@ -1,0 +1,48 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = -1
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = 'if center.name == "Wee Joker" and (center.discovered or self.bypass_discovery_center) then'
+position = "before"
+payload = '''
+if center.name == "wrenbind-Pill" and (center.discovered or self.bypass_discovery_center) then 
+    H = W
+    self.T.h = H
+    H = H*17/34
+    W = W*17/34
+    self.T.h = H
+    self.T.w = W
+end
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = 'elseif self.config.center.name == "Wee Joker" then'
+position = "before"
+payload = '''
+elseif self.config.center.name == "wrenbind-Pill" then 
+    H = W 
+    self.T.h = H*scale*17/34*scale
+    self.T.w = W*scale*17/34*scale
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = "if _center.name == 'Photograph' and (_center.discovered or self.bypass_discovery_center) then"
+position = "before"
+payload = '''
+if _center.name == 'wrenbind-Pill' and (_center.discovered or self.bypass_discovery_center) then 
+    self.children.center.scale.y = self.children.center.scale.x
+    self.children.center.scale.y = self.children.center.scale.y*17/34
+    self.children.center.scale.x = self.children.center.scale.x*17/34
+end
+'''
+match_indent = true

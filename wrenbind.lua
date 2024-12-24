@@ -1,9 +1,11 @@
-local mod_path = SMODS.current_mod.path:gsub("/", "\\"):gsub(love.filesystem.getWorkingDirectory(), "")
+local mod_path = SMODS.current_mod.path:gsub("/", "\\")
 Wrenbind_config = SMODS.current_mod.config
 
-WrenBind = {util = nil}
+WrenBind = {util = nil, pills_order = nil}
 
 IS_GFUEL = false
+
+local save_data = NFS.newFile(mod_path.."save/wrenbind.json")
 
 function is_battery()
     for i=1, #G.jokers.cards do
@@ -70,6 +72,40 @@ SMODS.Atlas({
 	py = 95,
 }):register()
 
+-- register pills atlas
+-- pills will be added in a future version of The Binding of Jimbo.
+
+--[[SMODS.Atlas({
+	key = "atlaspills",
+	path = "atlaspills.png",
+	px = 71,
+	py = 95,
+}):register()
+
+SMODS.ConsumableType{
+	key = "WrenPills",
+	primary_colour = G.C.MONEY,
+	secondary_colour = G.C.MONEY,
+	collection_rows = { 4, 5 },
+	loc_txt = {
+        collection = "Pills",
+        name = "Pills",
+        undiscovered = {
+            name = "Pill",
+            text = {"Effect Unknown"}
+        }
+    },
+    shop_rate = 1
+}
+
+SMODS.UndiscoveredSprite{
+    key = 'WrenPills', --must be the same key as the consumabletype
+    atlas = 'atlaspills',
+    pos = {x = 0, y = 0}
+}]]
+
+
+
 SMODS.Rarity {
     key = "q4",
     loc_txt = {
@@ -111,6 +147,7 @@ SMODS.Rarity {
 }
 
 WrenBind.util = SMODS.load_file("api/util.lua")()
+WrenBind.pill_order = WrenBind.util.scramble(0,10)
 
 local os = love.system.getOS()
 local steamid = nil
@@ -159,11 +196,11 @@ end
 --[[
     "Borrowed" from Cryptid
 ]]
-local files = NFS.getDirectoryItems(mod_path .. "jokers")
+local files = NFS.getDirectoryItems(mod_path .. "Items")
 WrenBind.obj_buffer = {}
 for _, file in ipairs(files) do
 	print("Loading file " .. file)
-	local f, err = SMODS.load_file("jokers/" .. file)
+	local f, err = SMODS.load_file("Items/" .. file)
 	if err then
 		print("Error loading file: " .. err)
 	else
@@ -204,6 +241,9 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 		SMODS[set](objs[i])
 	end
 end
+
+
+
 
 -- dice overrides
 local G_UIDEF_use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
