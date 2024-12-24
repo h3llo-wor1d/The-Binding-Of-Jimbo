@@ -1,22 +1,57 @@
---- STEAMODDED HEADER
---- MOD_NAME: The Binding Of Jimbo
---- MOD_ID: balatro_binding
---- PREFIX: wrenbind
---- MOD_AUTHOR: [Wrench]
---- MOD_DESCRIPTION: Adds 50+ new jokers and items based on the Binding Of Isaac by Edmund McMillen
---- BADGE_COLOUR: 708b91
---- DEPENDENCIES: [Steamodded>=1.0.0~ALPHA-0917a]
---- VERSION: 0.0.1a
---- PRIORITY: 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-
-----------------------------------------------
-------------MOD CODE -------------------------
 local mod_path = SMODS.current_mod.path:gsub("/", "\\"):gsub(love.filesystem.getWorkingDirectory(), "")
 Wrenbind_config = SMODS.current_mod.config
 
 WrenBind = {util = nil}
 
 IS_GFUEL = false
+
+function is_battery()
+    for i=1, #G.jokers.cards do
+        if G.jokers.cards[i].config.center.name == "wrenbind_thebattery" then
+            return true
+        end
+    end
+    return false
+end
+
+function charge_logic(self, card, context)
+    if context.end_of_round and not context.repetition and not context.individual and not context.blueprint then
+        local charges = card.ability.extra.charges
+        charges = charges + 1
+        if is_battery() then
+            if charges < (card.ability.extra.charge_max*2) then
+                play_sound("wrenbind_active_charge", 1, 1)
+                card.ability.extra.charges = charges
+                self.pos.extra.x = charges
+            elseif charges ~= (card.ability.extra.charge_max*2)+1 then
+                play_sound("wrenbind_active_charged", 1, 1)
+                card.ability.extra.charges = (card.ability.extra.charge_max*2)
+                self.pos.extra.x = (card.ability.extra.charge_max*2)
+                return {
+                    message = "Charged!"
+                }
+            end
+        else
+            if charges < card.ability.extra.charge_max then
+                play_sound("wrenbind_active_charge", 1, 1)
+                card.ability.extra.charges = charges
+                self.pos.extra.x = charges
+            elseif charges ~= (card.ability.extra.charge_max+1) then
+                
+                play_sound("wrenbind_active_charged", 1, 1)
+                card.ability.extra.charges = card.ability.extra.charge_max
+                self.pos.extra.x = card.ability.extra.charge_max
+                return {
+                    message = "Charged!"
+                }
+            end
+        end
+    end
+end
+
+function init_logic(self, card, context)
+    card.config.center.pos.extra.x = card.ability.extra.charge_max
+end
 
 
 SMODS.Sound:register_global()
@@ -75,7 +110,6 @@ SMODS.Rarity {
     pools = {["Joker"] = true}
 }
 
-local irp = SMODS.load_file("api/isaac.lua")() -- todo: load everything into an array that can be read instead of individually loading modules
 WrenBind.util = SMODS.load_file("api/util.lua")()
 
 local os = love.system.getOS()
@@ -121,26 +155,6 @@ function create_UIBox_blind_select(skip_ani)
     end
     return old_createuiblind()
 end
-
---[[ currently not working, will be implemented in future versions
-local old_desc = desc_from_rows
-function desc_from_rows(desc_nodes, empty, maxw)
-    local t = {}
-    local test = desc_nodes[1]and desc_nodes[1][1] and desc_nodes[1][1].config.text
-    if test:find("^wrenbind_") == nil then return old_desc(desc_nodes, empty, maxw) end
-    print("WRENBIND FOUND! CHANGING FONT TO TEAMMEAT")
-    desc_nodes[1][1].config.text = desc_nodes[1][1].config.text:gsub("^wrenbind_", '')
-    for k, v in ipairs(desc_nodes) do
-        t[#t+1] = {n=G.UIT.R, config={align = "cm", maxw = maxw}, nodes=v}
-    end
-    return {n=G.UIT.R, config={align = "cm", colour = empty and G.C.CLEAR or G.C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
-        {n=G.UIT.R, config={align = "cm", padding = 0.03}, nodes={
-            object = {DynaText({string = desc_nodes[1][1].config.text, font = WrenBind.TEAMMEAT})}
-        }}
-    }}
-    
-end
-]]
 
 --[[
     "Borrowed" from Cryptid
@@ -189,65 +203,6 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 		end
 		SMODS[set](objs[i])
 	end
-end
-
---[[
-if os == "Windows" then
-    -- logic to find isaac directory (i had multiple users on my pc so i'm trying to guesstimate the user's id)
-    local users = NFS.getDirectoryItems("C:\\Program Files (x86)\\Steam\\userdata\\")
-
-    for i=1, #users do
-        for _, value in ipairs(NFS.getDirectoryItems("C:\\Program Files (x86)\\Steam\\userdata\\"..users[i])) do
-            if value == "250900" then
-                steamid = users[i]
-                break
-            end
-        end
-    end
-end
-]]
-
-if steamid ~= nil then
-    -- only register these jokers and data if you have isaac on steam
-    local irp_dat = irp.read("C:\\Program Files (x86)\\Steam\\userdata\\"..steamid.."\\250900\\remote\\rep+persistentgamedata1.dat")
-    
-    local irp_sec = irp.getSecrets(irp_dat)
-
-    WrenBind.isaac = {
-        donations = irp.getInt(irp_dat, irp.getSectionOffsets(irp_dat)[2] + 0x4 + 0x4C),
-        deadgod = irp_sec[#irp_sec],
-        streak = irp.getInt(irp_dat, irp.getSectionOffsets(irp_dat)[2] + 0x4 + 0x54)
-    }
-
-    if WrenBind.isaac.streak < 0 then
-        WrenBind.isaac.streak = 0
-    end
-
-    SMODS.Joker {
-        key = 'save',
-        loc_txt = {
-          name = 'Save!',
-          text = {
-            "This Joker gains",
-            "{C:mult}+1{} Mult per {C:attention}Win{} in your",
-            "{C:mult}Binding of Isaac{} Win Streak",
-            "currently {X:mult}+"..WrenBind.isaac.streak.."{} Mult"
-          }
-        },
-        rarity = 2,
-        atlas = 'atlasone',
-        config = { extra = { mult = WrenBind.isaac.streak } },
-        pos = { x = 3, y = 0 },
-        cost = 4,
-        calculate = function(self, card, context)
-            if context.joker_main then
-                return {
-                  mult_mod = card.ability.extra.mult,
-                  message = localize { type = 'variable', key = 'a_mult', vars = { card.ability.extra.mult } }
-                }
-            end
-        end
-    }
 end
 
 -- dice overrides
@@ -464,5 +419,3 @@ SMODS.current_mod.config_tab = function()
         }
     }
 end
-----------------------------------------------
-------------MOD CODE END----------------------
