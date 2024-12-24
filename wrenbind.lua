@@ -1,11 +1,10 @@
-local mod_path = SMODS.current_mod.path:gsub("/", "\\")
+local mod_path = SMODS.current_mod.path
 Wrenbind_config = SMODS.current_mod.config
 
+print("INIT WRENBIND")
 WrenBind = {util = nil, pills_order = nil}
 
 IS_GFUEL = false
-
-local save_data = NFS.newFile(mod_path.."save/wrenbind.json")
 
 function is_battery()
     for i=1, #G.jokers.cards do
@@ -197,6 +196,7 @@ end
     "Borrowed" from Cryptid
 ]]
 local files = NFS.getDirectoryItems(mod_path .. "Items")
+print(#files.." files found to add!")
 WrenBind.obj_buffer = {}
 for _, file in ipairs(files) do
 	print("Loading file " .. file)
