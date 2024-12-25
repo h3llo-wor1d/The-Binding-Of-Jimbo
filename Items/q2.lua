@@ -9,7 +9,7 @@ local TheBattery = {
         }
     },
     atlas = "atlasone",
-    pos = { x = 0, y = 0 },
+    pos = { x = 10, y = 0 },
     rarity = "wrenbind_q2",
     cost = 8
 }
