@@ -1,11 +1,9 @@
-local mod_path = SMODS.current_mod.path:gsub("/", "\\")
+local mod_path = SMODS.current_mod.path
 Wrenbind_config = SMODS.current_mod.config
 
 WrenBind = {util = nil, pills_order = nil}
 
 IS_GFUEL = false
-
-local save_data = NFS.newFile(mod_path.."save/wrenbind.json")
 
 function is_battery()
     for i=1, #G.jokers.cards do
@@ -242,13 +240,46 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 	end
 end
 
-
-
-
--- dice overrides
+-- active item overrides
+-- this was going to be too big for one file, so to save my eyes and everyone else's, it is now stored elsewhere.
 local G_UIDEF_use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
+
+--[[function G.FUNCS.can_roll_selected(e)
+    local area = e.config.ref_table.area
+    local mergable = 0
+    for i = 1, #area.highlighted do
+        if area.highlighted[i].ability.extra and type(area.highlighted[i].ability.extra) == "table" and area.highlighted[i].ability.extra.can_select then
+            mergable = mergable + 1
+            active_select_card = area.highlighted[i]
+        end
+    end
+    if mergable == 1 then
+        e.config.colour = G.C.DARK_EDITION
+        e.config.button = "use_select_active"
+    else
+        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+        e.config.button = nil
+    end
+end]]
+
+--[[function G.FUNCS.use_select_active(e)
+    e.config.ref_table.area:remove_from_highlighted(e.config.ref_table)
+    G.E_MANAGER:add_event(Event({
+        trigger = "after",
+        delay = 1,
+        func = function()
+            local area = e.config.ref_table.area
+            area:remove_card(e.config.ref_table)
+            active_select_card:use()
+            e.config.ref_table:remove()
+            e.config.ref_table = nil
+            return true
+        end,
+    }))
+end]]
+
 function G.UIDEF.use_and_sell_buttons(card)
-    local m = G_UIDEF_use_and_sell_buttons_ref(card)
+    local m = G_UIDEF_use_and_sell_buttons_ref(card)  
     if
         card.area
         and card.area == G.jokers

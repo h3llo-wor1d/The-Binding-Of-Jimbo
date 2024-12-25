@@ -87,35 +87,182 @@ local D20 = {
     
 }
 
--- charge = 6 blinds
--- d6 isn't working yet, sorry! - willow
---[[local D6 = {
+
+local function find_joker(card)
+    for i=1, #G.jokers.cards do if G.jokers.cards[i].config.center.name == card then return i end end
+end
+
+local D6 = {
     object_type = "Joker",
     name = "wrenbind_d6",
     key = "d6",
     loc_txt = {
-        name = "D6",
+        name = "The D6",
         text = {
-            "Rerolls one selected {C:attention}Joker{}",
-            "Limit {C:attention}1 per Round{}" -- todo: make one per blind
+            "\"Reroll Your Destiny\""
         }
     },
     atlas = "atlasone",
-    pos = { x = 0, y = 0, extra = {x = 0, y = 0, atlas="wrenbind_charge"}},
-    --soul_pos = { x = 2, y = 0 },
+    config = {
+        extra = {charges = 4, charge_max = 4},
+    },
+    pos = { x = 0, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"}},
     rarity = "wrenbind_q4",
     cost = 20,
-    
-    calculate = function(self, card, context)
-        if context.end_of_round and not context.game_over and not context.repetition and not context.blueprint then
-            WrenBind.can_roll.d6 = true
+    added_to_deck = init_logic,
+    remove_from_deck = init_logic,
+    calculate = charge_logic,
+    use = function(card)
+        if #card.area.highlighted > 2 then
+            play_sound("wrenbind_error_buzz")
+            WrenBind.util.alert_dice(card, "Can only select 1 Joker!", 1)
+            return true
+        end
+        if #card.area.highlighted == 1 then
+            play_sound("wrenbind_error_buzz")
+            WrenBind.util.alert_dice(card, "Must select another Joker!", 1)
+            return true
+        end
+        local new_charges = card.ability.extra.charges-card.ability.extra.charge_max
+        card.ability.extra.charges = new_charges
+        card.config.center.pos.extra.x = new_charges
+        WrenBind.util.alert_dice(card, "Roll!", 0.75)
+        WrenBind.util.play_foley("dice", 1)
+        local area = card.area
+        local highlighted = area.highlighted
+        local count = #highlighted
+        local cards = {}
+        local counter = 1
+
+        for i=1, count do
+            if (highlighted[i].config.center.name ~= "wrenbind_d6") then
+                cards[#cards+1] = highlighted[i].config.center.name
+            end
+        end
+
+        G.jokers:unhighlight_all()
+
+        for i=1, #cards do
+            local index = find_joker(cards[i])
+            local temp_c = G.jokers.cards[index]
+            local rarity = temp_c.config.center.rarity
+            local is_soul = false
+            if type(rarity) ~= "string" then
+                rarity = (rarity == 4 and 4) or (rarity == 3 and 0.98) or (rarity == 2 and 0.75) or 0
+                if rarity == 4 then
+                    is_soul = true
+                end
+            end
+            local temp = G.jokers.cards[index]
+            local c = create_card('Joker', G.jokers, is_soul, rarity, nil, nil, nil, "wbin")
+            c:add_to_deck()
+            local temp = G.jokers.cards[index]
+            G.jokers:emplace(c)
+            temp:remove()
+            G.jokers:remove_card(temp)
+            table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))
+            counter = counter+1
+            if counter > count then break end
+        end
+        
+        
+    end
+}
+
+local ED6 = {
+    object_type = "Joker",
+    name = "wrenbind_ed6",
+    key = "ed6",
+    loc_txt = {
+        name = "Eternal D6",
+        text = {
+            "\"???\""
+        }
+    },
+    atlas = "atlasone",
+    config = {
+        extra = {charges = 2, charge_max = 2},
+    },
+    pos = { x = 0, y = 0, extra = {x = 2, y = 3, atlas="wrenbind_charge"}},
+    rarity = "wrenbind_q3",
+    cost = 20,
+    added_to_deck = init_logic,
+    remove_from_deck = init_logic,
+    calculate = charge_logic,
+    use = function(card)
+        if #card.area.highlighted > 2 then
+            play_sound("wrenbind_error_buzz")
+            WrenBind.util.alert_dice(card, "Can only select 1 Joker!", 1)
+            return true
+        end
+        if #card.area.highlighted == 1 then
+            play_sound("wrenbind_error_buzz")
+            WrenBind.util.alert_dice(card, "Must select another Joker!", 1)
+            return true
+        end
+        local new_charges = card.ability.extra.charges-card.ability.extra.charge_max
+        card.ability.extra.charges = new_charges
+        card.config.center.pos.extra.x = new_charges
+        WrenBind.util.alert_dice(card, "Roll!", 0.75)
+        WrenBind.util.play_foley("dice", 1)
+        local area = card.area
+        local highlighted = area.highlighted
+        local count = #highlighted
+        local card = nil
+        local counter = 1
+
+        for i=1, count do
+            if (highlighted[i].config.center.name ~= "wrenbind_ed6") then
+                card = highlighted[i].config.center.name
+            end
+        end
+
+        G.jokers:unhighlight_all()
+        local index = find_joker(card)
+        local temp = G.jokers.cards[index]
+        local rarity = temp.config.center.rarity
+        local is_soul = false
+        if type(rarity) ~= "string" then
+            rarity = (rarity == 4 and 4) or (rarity == 3 and 0.98) or (rarity == 2 and 0.75) or 0
+            if rarity == 4 then
+                is_soul = true
+            end
+        end
+        if love.math.random(1,4) == 1 then
+            WrenBind.util.alert_dice(temp, "Extinct!", 1)
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                play_sound('tarot1')
+                temp.T.r = -0.2
+                temp:juice_up(0.3, 0.4)
+                temp.states.drag.is = true
+                temp.children.center.pinch.x = true
+                -- This part destroys the card.
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.3,
+                    blockable = false,
+                    func = function()
+                    G.jokers:remove_card(temp)
+                    temp:remove()
+                    temp = nil
+                    return true;
+                    end
+                }))
+                return true
+                end
+            }))
+        else
+            local c = create_card('Joker', G.jokers, is_soul, rarity, nil, nil, nil, "wbin")
+            c:add_to_deck()
+            G.jokers:emplace(c)
+            temp:remove()
+            G.jokers:remove_card(temp)
+            table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))
         end
     end
-}]]
+}
 
--- get_new_boss() for changing boss for whatever card was going to do that
-
--- charge = 6 blinds
 local D4 = {
     object_type = "Joker",
     name = "wrenbind_d4",
@@ -188,6 +335,8 @@ return {
     items = {
         D20,
         D4,
-        D12
+        D12,
+        D6,
+        ED6
     }
 }

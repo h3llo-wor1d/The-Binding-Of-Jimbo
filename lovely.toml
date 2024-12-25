@@ -34,3 +34,11 @@ else
 end
 '''
 match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "{card_limit = self.GAME.starting_params.joker_slots, type = 'joker', highlight_limit = 1})"
+position = "at"
+payload = "{card_limit = self.GAME.starting_params.joker_slots, type = 'joker', highlight_limit = 1e100})"
+match_indent = true

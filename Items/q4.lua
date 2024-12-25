@@ -140,7 +140,7 @@ local Brimstone = {
         if context.individual and context.cardarea == G.play then
             card.ability.extra.count = card.ability.extra.count + 1
             return {
-                x_mult = 6-card.ability.extra.count,
+                x_mult = (6-card.ability.extra.count <= 0 and 1 or 6-card.ability.extra.count),
                 card = context.other_card
             }
         end 
