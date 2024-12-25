@@ -1,6 +1,7 @@
 local mod_path = SMODS.current_mod.path
 Wrenbind_config = SMODS.current_mod.config
 
+print("INIT WRENBIND")
 WrenBind = {util = nil, pills_order = nil}
 
 IS_GFUEL = false
@@ -195,6 +196,7 @@ end
     "Borrowed" from Cryptid
 ]]
 local files = NFS.getDirectoryItems(mod_path .. "Items")
+print(#files.." files found to add!")
 WrenBind.obj_buffer = {}
 for _, file in ipairs(files) do
 	print("Loading file " .. file)
