@@ -102,11 +102,13 @@ local D6 = {
             "\"Reroll Your Destiny\""
         }
     },
+    eternal_compat = true,
     atlas = "atlasone",
     config = {
         extra = {charges = 4, charge_max = 4},
     },
-    pos = { x = 0, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"}},
+    pos = { x = 8, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"}},
+    soul_pos = {x = 9, y = 0},
     rarity = "wrenbind_q4",
     cost = 20,
     added_to_deck = init_logic,
@@ -131,39 +133,32 @@ local D6 = {
         local area = card.area
         local highlighted = area.highlighted
         local count = #highlighted
-        local cards = {}
+        local card = nil
         local counter = 1
 
         for i=1, count do
             if (highlighted[i].config.center.name ~= "wrenbind_d6") then
-                cards[#cards+1] = highlighted[i].config.center.name
+                card = highlighted[i].config.center.name
             end
         end
 
         G.jokers:unhighlight_all()
-
-        for i=1, #cards do
-            local index = find_joker(cards[i])
-            local temp_c = G.jokers.cards[index]
-            local rarity = temp_c.config.center.rarity
-            local is_soul = false
-            if type(rarity) ~= "string" then
-                rarity = (rarity == 4 and 4) or (rarity == 3 and 0.98) or (rarity == 2 and 0.75) or 0
-                if rarity == 4 then
-                    is_soul = true
-                end
+        local index = find_joker(card)
+        local temp = G.jokers.cards[index]
+        local rarity = temp.config.center.rarity
+        local is_soul = false
+        if type(rarity) ~= "string" then
+            rarity = (rarity == 4 and 4) or (rarity == 3 and 0.98) or (rarity == 2 and 0.75) or 0
+            if rarity == 4 then
+                is_soul = true
             end
-            local temp = G.jokers.cards[index]
-            local c = create_card('Joker', G.jokers, is_soul, rarity, nil, nil, nil, "wbin")
-            c:add_to_deck()
-            local temp = G.jokers.cards[index]
-            G.jokers:emplace(c)
-            temp:remove()
-            G.jokers:remove_card(temp)
-            table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))
-            counter = counter+1
-            if counter > count then break end
         end
+        local c = create_card('Joker', G.jokers, is_soul, rarity, nil, nil, nil, "wbin")
+        c:add_to_deck()
+        G.jokers:emplace(c)
+        temp:remove()
+        G.jokers:remove_card(temp)
+        table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))
         
         
     end
@@ -183,6 +178,7 @@ local ED6 = {
     config = {
         extra = {charges = 2, charge_max = 2},
     },
+    eternal_compat = true,
     pos = { x = 0, y = 0, extra = {x = 2, y = 3, atlas="wrenbind_charge"}},
     rarity = "wrenbind_q3",
     cost = 20,

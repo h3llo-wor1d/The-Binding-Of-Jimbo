@@ -71,6 +71,13 @@ SMODS.Atlas({
 	py = 95,
 }):register()
 
+SMODS.Atlas({
+	key = "atlasdeck",
+	path = "atlasdeck.png",
+	px = 71,
+	py = 95,
+}):register()
+
 -- register pills atlas
 -- pills will be added in a future version of The Binding of Jimbo.
 
