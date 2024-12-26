@@ -110,7 +110,22 @@ SMODS.UndiscoveredSprite{
     pos = {x = 0, y = 0}
 }]]
 
+WrenBind.util = SMODS.load_file("api/util.lua")()
+WrenBind.pill_order = WrenBind.util.scramble(0,10)
 
+local function calc_weight(pool)
+    local x = 0
+    for i=1, #G.jokers.cards do
+        if WrenBind.util.has_value(pool, G.jokers.cards[i].config.center.name) then
+            x = x + 1
+        end
+    end
+    if x ~= #pool then
+        return 0.075
+    else
+        return 0
+    end
+end
 
 SMODS.Rarity {
     key = "q4",
@@ -120,6 +135,9 @@ SMODS.Rarity {
     badge_colour = HEX('ffd100'),
     default_weight = 0.075,
     pools = {["Joker"] = true},
+    get_weight = function(self, weight, object_type)
+        return calc_weight(WrenBind.q4)
+    end,
 }
 
 SMODS.Rarity {
@@ -129,7 +147,10 @@ SMODS.Rarity {
     },
     default_weight=0.085,
     badge_colour = HEX('ff54ec'),
-    pools = {["Joker"] = true}
+    pools = {["Joker"] = true},
+    get_weight = function(self, weight, object_type)
+        return calc_weight(WrenBind.q3)
+    end,
 }
 
 SMODS.Rarity {
@@ -139,7 +160,10 @@ SMODS.Rarity {
     },
     default_weight=0.095,
     badge_colour = HEX('65d5ff'),
-    pools = {["Joker"] = true}
+    pools = {["Joker"] = true},
+    get_weight = function(self, weight, object_type)
+        return calc_weight(WrenBind.q2)
+    end,
 }
 
 SMODS.Rarity {
@@ -149,11 +173,12 @@ SMODS.Rarity {
     },
     default_weight=0.1,
     badge_colour = HEX('c2c2c2'),
-    pools = {["Joker"] = true}
+    pools = {["Joker"] = true},
+    get_weight = function(self, weight, object_type)
+        return calc_weight(WrenBind.q0)
+    end,
 }
 
-WrenBind.util = SMODS.load_file("api/util.lua")()
-WrenBind.pill_order = WrenBind.util.scramble(0,10)
 
 local os = love.system.getOS()
 local steamid = nil
@@ -218,6 +243,7 @@ for _, file in ipairs(files) do
         if not curr_obj.items then
             print("Warning: " .. file .. " has no items")
         else
+            if curr_obj.quality then WrenBind[curr_obj.quality] = {} end
             for _, item in ipairs(curr_obj.items) do
                 if not item.order then
                     item.order = 0
@@ -229,6 +255,7 @@ for _, file in ipairs(files) do
                     if not WrenBind.obj_buffer[item.object_type] then
                         WrenBind.obj_buffer[item.object_type] = {}
                     end
+                    if curr_obj.quality then WrenBind[curr_obj.quality][#WrenBind[curr_obj.quality]+1] = item.name end -- custom logic to add pooling globally
                     WrenBind.obj_buffer[item.object_type][#WrenBind.obj_buffer[item.object_type] + 1] = item
                 else
                     print("Error loading item " .. item.key .. " of unknown type " .. item.object_type)

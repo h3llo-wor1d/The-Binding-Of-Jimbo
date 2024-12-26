@@ -209,6 +209,7 @@ local GFuel = {
 
 return {
     name = "Quality 4 Jokers",
+    quality = "q4",
     items = {
         Polyphemus,
         GFuel,

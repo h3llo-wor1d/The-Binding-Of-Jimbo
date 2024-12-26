@@ -34,6 +34,7 @@ local CursedEye = {
 
 return {
     name = "Quality 0 Jokers",
+    quality = "q0",
     items = {
         CursedEye
     }

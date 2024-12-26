@@ -53,6 +53,7 @@ local IVBag = {
 
 return {
     name = "Quality 2 Jokers",
+    quality = "q2",
     items = {
         TheBattery,
         IVBag
