@@ -16,26 +16,67 @@ local IsaacDeck = {
     apply = function()
         G.E_MANAGER:add_event(Event({
 			func = function()
-                local c = SMODS.create_card({
-                    set="Joker", 
-                    area=G.jokers, 
-                    skip_materialize=true, 
-                    key="j_wrenbind_d6", 
-                    edition="e_negative",
-                    stickers={"eternal"}
+                WrenBind.util.deck_joker({
+                    joker = "wrenbind_d6",
+                    negative = true
                 })
-                c:add_to_deck()
-                G.jokers:emplace(c)
 				return true
 			end
 		}))
     end
 }
 
+local LostDeck = {
+    object_type = "Back",
+    name = "wrenbind-Lost",
+    key = "lost",
+    loc_txt = {
+        name = "Lost Deck",
+        text = {
+            "Start with a {C:attention}Negative{}",
+            "ED6 Joker and Holy Mantle Joker.",
+            "{C:mult}x2{} Mult, 1 Hand",
+            "and 1 Discard."
+        }
+    },
+    config = { hands = -3, discards = -2},
+    order = 2,
+    pos = { x = 0, y = 0 },
+    atlas = "atlasdeck",
+    apply = function()
+        G.E_MANAGER:add_event(Event({
+			func = function()
+                G.GAME.round_resets.hands = 1
+                G.GAME.round_resets.discards = 1
+                WrenBind.util.deck_joker({
+                    joker = "wrenbind_ed6",
+                    negative = true
+                })
+                WrenBind.util.deck_joker({
+                    joker = "wrenbind_holymantle",
+                    negative = true,
+                    eternal = true
+                })
+				return true
+			end
+		}))
+    end,
+    trigger_effect = function(self, args)
+		if args.context == 'final_scoring_step' then
+            args.mult = args.mult*2
+            args.chips = args.chips*2
+            update_hand_text({delay = 0}, {mult = args.mult, chips = args.chips})
+            delay(0.6)
+            return args.chips, args.mult
+        end
+	end,
+}
+
 return {
     name = "Character Decks",
     items = {
-        IsaacDeck
+        IsaacDeck,
+        LostDeck
     },
     
 }

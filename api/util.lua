@@ -63,6 +63,19 @@ local function has_value (tab, val)
     return false
 end
 
+local function deck_joker(vars)
+    local c = create_card('Joker', G.jokers, nil, nil, nil, nil, "j_"..vars.joker, "wbin")
+    c:start_materialize(nil, true)
+    c:add_to_deck()
+    if vars.eternal then
+        c:set_eternal(true)
+    end
+    if vars.negative then
+        c:set_edition({negative = true}, nil, true)
+    end
+    G.jokers:emplace(c)
+end
+
 local function alert_dice(card, message, duration)
     attention_text({
         text = message,
@@ -89,6 +102,7 @@ return {
     alert_dice = alert_dice,
     play_foley = play_foley,
     reroll_tags = reroll_tags,
-    scramble = scramble
+    scramble = scramble,
+    deck_joker = deck_joker
 }
  

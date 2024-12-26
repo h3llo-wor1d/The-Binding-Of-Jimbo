@@ -207,12 +207,48 @@ local GFuel = {
     end
 }
 
+local HolyMantle = {
+    object_type = "Joker",
+    name = "wrenbind_holymantle",
+    key = "holymantle",
+    loc_txt = {
+        name = "Holy Mantle",
+        text = {
+            "\"Holy Shield\""
+        }
+    },
+    atlas = "atlasone",
+    pos = { x = 0, y = 0},
+    rarity = "wrenbind_q4",
+    config = {
+        extra = {active=true}
+    },
+    cost = 20,
+    calculate = function(self, card, context)
+        if G.GAME.chips < G.GAME.blind.chips and context.cardarea == G.jokers and context.joker_main then
+            -- todo: check for plasma deck calc as well in this if statement if using plasma
+            if card.ability.extra.active and G.GAME.current_round.hands_left == 0 then
+                card.ability.extra.active = false
+                G.STATES.GAME_OVER = false
+                ease_hands_played(1)
+                ease_discard(1)
+                play_sound("wrenbind_mantle_shatter")
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = "Safe!"})
+            end
+        end
+        if context.end_of_round and not context.game_over and not context.repetition and not context.blueprint and not context.individual then
+            card.ability.extra.active = true
+        end
+    end
+}
+
 return {
     name = "Quality 4 Jokers",
     quality = "q4",
     items = {
         Polyphemus,
         GFuel,
-        Brimstone
+        Brimstone,
+        HolyMantle
     }
 }
