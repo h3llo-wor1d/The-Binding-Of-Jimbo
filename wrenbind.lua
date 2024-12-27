@@ -4,6 +4,27 @@ Wrenbind_config = SMODS.current_mod.config
 print("INIT WRENBIND")
 WrenBind = {util = nil, pills_order = nil}
 
+
+
+local lc = loc_colour
+function loc_colour(_c, _default)
+	if not G.ARGS.LOC_COLOURS then
+		lc()
+	end
+
+    -- Custom Pool Colors
+	G.ARGS.LOC_COLOURS.devil = HEX("ffd6c4")
+    G.ARGS.LOC_COLOURS.devilbg = HEX("d40001")
+    G.ARGS.LOC_COLOURS.angel =  HEX("fefefe")
+    G.ARGS.LOC_COLOURS.angelbg =  HEX("8999d3")
+	return lc(_c, _default)
+end
+
+SMODS.Language {
+    key = "en-us",
+    label = "English (USA)"
+}
+
 IS_GFUEL = false
 
 function is_battery()
@@ -74,6 +95,13 @@ SMODS.Atlas({
 SMODS.Atlas({
 	key = "atlasdeck",
 	path = "atlasdeck.png",
+	px = 71,
+	py = 95,
+}):register()
+
+SMODS.Atlas({
+	key = "atlaspacks",
+	path = "atlaspacks.png",
 	px = 71,
 	py = 95,
 }):register()

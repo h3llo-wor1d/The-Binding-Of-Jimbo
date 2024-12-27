@@ -92,28 +92,25 @@ local Polyphemus = {
     loc_txt = {
         name = "Polyphemus",
         text = {
-            "\"Mega Mult\""
+            "{X:mult,C:white}^1.5{} mult"
         }
     },
     atlas = "atlasone",
     config = {extra = {active = false}},
-    pos = { x = 0, y = 1 },
+    pos = { x = 0, y = 0 },
     rarity = "wrenbind_q4",
     cost = 20,
     calculate = function(self, card, context)
-        if context.cardarea == G.jokers and context.after and not card.ability.extra.active then
-            card.ability.extra.active = true
-        end
         if 
             context.cardarea == G.jokers
-            and not context.before
-            and not context.after
-            and card.ability.extra.active
+            and context.joker_main
         then
-            card.ability.extra.active = false
-            hand_chips = hand_chips^1.50
-            mult = mult^1.50
-            SMODS.eval_this(card, {message = "x2?", colour = G.C.MULT})
+            return {
+                mult_mod = math.floor(((mult^1.50)-mult) + 0.5),
+                chip_mod = math.floor(((hand_chips^1.50)-hand_chips) + 0.5),
+                message = "Mega!",
+                card = self
+            }
         end   
     end
 }
@@ -125,9 +122,14 @@ local Brimstone = {
     loc_txt = {
         name = "Brimstone",
         text = {
-            "\"Blood laser barrage\""
+            "Gives {X:mult,C:white}x6{} mult for every",
+            "card scored. {X:mult,C:white}-1x{} mult",
+            "per card scored until {X:mult,C:white}1x{}."
         }
     },
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_devilpool" }
+	end,
     atlas = "atlasone",
     pos = { x = 0, y = 0 },
     rarity = "wrenbind_q4",
@@ -216,7 +218,9 @@ local HolyMantle = {
     loc_txt = {
         name = "Holy Mantle",
         text = {
-            "\"Holy Shield\""
+            "Prevents {C:attention}Game Over{} giving",
+            "{C:attention}+1{} Hand and {C:attention}+1{} Discard to",
+            "finish the blind, {C:attention}once{} per Blind."
         }
     },
     atlas = "atlasone",
@@ -226,6 +230,9 @@ local HolyMantle = {
         extra = {active=true}
     },
     cost = 20,
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_angelpool" }
+	end,
     calculate = function(self, card, context)
         if G.GAME.chips < G.GAME.blind.chips and context.cardarea == G.jokers and context.joker_main then
             -- todo: check for plasma deck calc as well in this if statement if using plasma

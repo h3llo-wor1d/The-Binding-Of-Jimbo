@@ -5,9 +5,13 @@ local D12 = {
     loc_txt = {
         name = "D12",
         text = {
-            "\"Rerolls Tags\""
+            "Rerolls all skip tags",
+            "for the current Ante."
         }
     },
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+	end,
     config = {extra = {charges = 3, charge_max = 3}}, 
     atlas = "atlasone",
     pos = { x = 5, y = 0, extra = {x = 3, y = 2, atlas="wrenbind_charge"} },
@@ -30,15 +34,19 @@ local D12 = {
 
 local D20 = {
     object_type = "Joker",
-    name = "wrenbind_d20f",
+    name = "wrenbind_d20",
     key = "d20",
     loc_txt = {
         name = "D20",
         text = {
-            "\"Reroll The Basics\""
+            "Rerolls all consumeables",
+            "in hand, {C:attention}keeping",
+            "{C:attention}their edition intact{}."
         }
     },
-    -- todo: set charge_max and replace can_roll with if charges > charge_max and then subtract charges by charge_max for battery cases
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+	end,
     config = {extra = {charges = 4, charge_max = 4}}, 
     atlas = "atlasone",
     pos = { x = 1, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"} },
@@ -99,9 +107,14 @@ local D6 = {
     loc_txt = {
         name = "The D6",
         text = {
-            "\"Reroll Your Destiny\""
+            "Changes {C:attention}1{} selected Joker",
+            "into another of the {C:attention}same",
+            "{C:attention}rarity and edition{}."
         }
     },
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+	end,
     eternal_compat = true,
     atlas = "atlasone",
     config = {
@@ -171,9 +184,16 @@ local ED6 = {
     loc_txt = {
         name = "Eternal D6",
         text = {
-            "\"???\""
+            "Changes {C:attention}1{} selected Joker",
+            "into another of the {C:attention}same",
+            "{C:attention}rarity and edition{}. {C:green}#1# in 4{}",
+            "chance to destroy new Joker."
         }
     },
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+        return {vars = {G.GAME.probabilities.normal}}
+	end,
     atlas = "atlasone",
     config = {
         extra = {charges = 2, charge_max = 2},
@@ -224,7 +244,7 @@ local ED6 = {
                 is_soul = true
             end
         end
-        if love.math.random(1,4) == 1 then
+        if love.math.random(1,4) <= G.GAME.probabilities.normal then
             WrenBind.util.alert_dice(temp, "Extinct!", 1)
             G.E_MANAGER:add_event(Event({
                 func = function()
@@ -266,7 +286,9 @@ local D4 = {
     loc_txt = {
         name = "D4",
         text = {
-            "\"Reroll Into Something Else\""
+            "Rerolls all Jokers in hand",
+            "{C:attention}except for itself{}, keeping",
+            "the Jokers' {C:attention}editions intact{}."
         }
     },
     atlas = "atlasone",
@@ -278,6 +300,9 @@ local D4 = {
     added_to_deck = init_logic,
     remove_from_deck = init_logic,
     calculate = charge_logic,
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+	end,
     use = function(card)
         if #G.jokers.cards-1 == 0 then
             WrenBind.util.alert_dice(card, "Nothing to roll!", 0.65)

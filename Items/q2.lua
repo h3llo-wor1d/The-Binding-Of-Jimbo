@@ -5,7 +5,8 @@ local TheBattery = {
     loc_txt={
         name="The Battery",
         text = {
-            "\"Stores Energy\""
+            "Allows you to charge",
+            "{C:gold}Active Jokers{} twice."
         }
     },
     atlas = "atlasone",
@@ -21,9 +22,15 @@ local IVBag = {
     loc_txt={
         name="IV Bag",
         text = {
-            "\"Portable blood bank\""
+            "On use, removes {C:attention}1{} Hand",
+            "for {C:green}#1# to 3{} Discards",
+            "for the current round."
         }
     },
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+        return {vars = {(G.GAME.probabilities.normal-1)}}
+	end,
     atlas = "atlasone",
     config = {extra = {charges = 1, charge_max = 1}},
     pos = { x = 0, y = 0, extra = {x = 1, y = 4, atlas="wrenbind_charge"} },
@@ -40,11 +47,17 @@ local IVBag = {
             card.config.center.pos.extra.x = new_charges
             WrenBind.util.alert_dice(card, "Prick!", 0.75)
             ease_hands_played(-1)
+            local prob_add = G.GAME.probabilities.normal-1
             local discards = love.math.random(0,3)
-            ease_discard(discards)
-            return true     
+            if discards + prob_add > 3 and G.GAME.probabilities.normal-1 <= 3 then
+                ease_discard(discards)
+            else
+                ease_discard(discards+prob_add)
+            end
+            return true  
         end
-        WrenBind.util.alert_dice(card, "Can only use during Blind!", 0.85)
+        WrenBind.util.alert_dice(card, "Can only use during Blind!", 1)
+        play_sound("wrenbind_error_buzz")
         return true
     end
 }
