@@ -1,0 +1,21 @@
+[
+    {
+        "title": "New Mechanics",
+        "changes": [
+            "Added global probabilities to ED6 and IV Bag",
+            "Began work on adding devil/angel deal mechanics in the form of packs (not available in this version)"
+        ]
+    },
+    {
+        "title": "Other Changes",
+        "changes": [
+            "Added item descriptions for (almost) everything"
+        ]
+    },
+    {
+        "title": "Bug Fixes",
+        "changes": [
+            "Minor bugfixes and optimizations"
+        ]
+    }
+]
