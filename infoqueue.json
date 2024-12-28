@@ -15,7 +15,8 @@
     {
         "title": "Bug Fixes",
         "changes": [
-            "Minor bugfixes and optimizations"
+            "Minor bugfixes and optimizations",
+            "Fixed holy mantle. Lost deck is now complete (minus spriting)."
         ]
     }
 ]
