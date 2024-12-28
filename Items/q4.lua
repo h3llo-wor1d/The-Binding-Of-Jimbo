@@ -100,6 +100,7 @@ local Polyphemus = {
     pos = { x = 0, y = 0 },
     rarity = "wrenbind_q4",
     cost = 20,
+    blueprint_compat = true,
     calculate = function(self, card, context)
         if 
             context.cardarea == G.jokers
