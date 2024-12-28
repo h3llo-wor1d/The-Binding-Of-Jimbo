@@ -4,7 +4,9 @@ Wrenbind_config = SMODS.current_mod.config
 print("INIT WRENBIND")
 WrenBind = {util = nil, pills_order = nil}
 
-
+WrenBind.find_joker = function(card)
+    for i=1, #G.jokers.cards do if G.jokers.cards[i].config.center.name == card then return i end end
+end
 
 local lc = loc_colour
 function loc_colour(_c, _default)
@@ -516,6 +518,29 @@ end
 
 function G.FUNCS.nothing(e)
     return true
+end
+
+function Game:update_new_round(dt)
+    if self.buttons then self.buttons:remove(); self.buttons = nil end
+    if self.shop then self.shop:remove(); self.shop = nil end
+
+    if not G.STATE_COMPLETE then
+        local card = WrenBind.find_joker("wrenbind_holymantle")
+        if card ~= nil then
+            card = G.jokers.cards[card]
+            if card.ability.extra.active and G.GAME.current_round.hands_left == 0 then
+                G.STATE = G.STATES.DRAW_TO_HAND
+                card.ability.extra.active = false
+                ease_hands_played(1)
+                ease_discard(1)
+                play_sound("wrenbind_mantle_shatter")
+                card_eval_status_text(card, 'extra', nil, nil, nil, {message = "Safe!"})
+                return true
+            end
+        end
+        G.STATE_COMPLETE = true
+        end_round()
+    end
 end
 
 G.FUNCS.cycle_update = function(args)
