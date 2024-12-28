@@ -9,7 +9,8 @@
     {
         "title": "Other Changes",
         "changes": [
-            "Added item descriptions for (almost) everything"
+            "Added item descriptions for (almost) everything",
+            "Added blueprint compat for Polyphemus and Cursed Eye."
         ]
     },
     {
