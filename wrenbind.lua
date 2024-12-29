@@ -38,38 +38,36 @@ function is_battery()
     return false
 end
 
-function charge_logic(self, card, context)
-    if context.end_of_round and not context.repetition and not context.individual and not context.blueprint then
-        local charges = card.ability.extra.charges
-        charges = charges + 1
-        if is_battery() then
-            if charges < (card.ability.extra.charge_max*2) then
-                play_sound("wrenbind_active_charge", 1, 1)
-                card.ability.extra.charges = charges
-                self.pos.extra.x = charges
-            elseif charges ~= (card.ability.extra.charge_max*2)+1 then
-                play_sound("wrenbind_active_charged", 1, 1)
-                card.ability.extra.charges = (card.ability.extra.charge_max*2)
-                self.pos.extra.x = (card.ability.extra.charge_max*2)
-                return {
-                    message = "Charged!"
-                }
-            end
-        else
-            if charges < card.ability.extra.charge_max then
-                play_sound("wrenbind_active_charge", 1, 1)
-                card.ability.extra.charges = charges
-                self.pos.extra.x = charges
-            elseif charges ~= (card.ability.extra.charge_max+1) then
-                
-                play_sound("wrenbind_active_charged", 1, 1)
-                card.ability.extra.charges = card.ability.extra.charge_max
-                self.pos.extra.x = card.ability.extra.charge_max
-                return {
-                    message = "Charged!"
-                }
-            end
+function charge_logic(card, add)
+    local charges = card.ability.extra.charges
+    local charge_max = card.ability.extra.charge_max
+    if add == nil then add = 1 end
+    charges = charges + add 
+
+    if is_battery() then
+        if charges > (charge_max * 2) and add ~= 1 then charges = charge_max * 2 end
+        if charges < (card.ability.extra.charge_max*2) then
+            play_sound("wrenbind_active_charge", 1, 1)
+            card.ability.extra.charges = charges
+            card.config.center.pos.extra.x = charges
+        elseif charges ~= (card.ability.extra.charge_max*2)+1 then
+            play_sound("wrenbind_active_charged", 1, 1)
+            card.ability.extra.charges = (card.ability.extra.charge_max*2)
+            card.config.center.pos.extra.x = (card.ability.extra.charge_max*2)
+            WrenBind.util.alert_dice(card, "Charged!", 1)
         end
+        return true
+    end
+    if charges > charge_max and add ~= 1 then charges = charge_max end
+    if charges < card.ability.extra.charge_max then
+        play_sound("wrenbind_active_charge", 1, 1)
+        card.ability.extra.charges = charges
+        card.config.center.pos.extra.x = charges
+    elseif charges ~= (card.ability.extra.charge_max+1) then
+        play_sound("wrenbind_active_charged", 1, 1)
+        card.ability.extra.charges = card.ability.extra.charge_max
+        card.config.center.pos.extra.x = card.ability.extra.charge_max
+        WrenBind.util.alert_dice(card, "Charged!", 1)
     end
 end
 
@@ -106,6 +104,13 @@ SMODS.Atlas({
 	path = "atlaspacks.png",
 	px = 71,
 	py = 95,
+}):register()
+
+SMODS.Atlas({
+	key = "wrenbind_tags",
+	path = "tags.png",
+	px = 34,
+	py = 34,
 }):register()
 
 -- register pills atlas
@@ -536,6 +541,12 @@ function Game:update_new_round(dt)
                 play_sound("wrenbind_mantle_shatter")
                 card_eval_status_text(card, 'extra', nil, nil, nil, {message = "Safe!"})
                 return true
+            end
+        end
+        for i=1, #G.jokers.cards do
+            local card = G.jokers.cards[i]
+            if card.ability and card.ability.extra ~= nil and type(card.ability.extra) == "table" and card.ability.extra.charges ~= nil then
+                charge_logic(card)
             end
         end
         G.STATE_COMPLETE = true

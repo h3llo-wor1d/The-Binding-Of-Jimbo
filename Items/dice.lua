@@ -18,7 +18,6 @@ local D12 = {
     soul_pos = { x = 6, y = 0 },
     rarity = "wrenbind_q2",
     cost = 16,
-    calculate = charge_logic,
     added_to_deck = init_logic,
     remove_from_deck = init_logic, 
     use = function(card)
@@ -53,7 +52,6 @@ local D20 = {
     soul_pos = { x = 2, y = 0 },
     rarity = "wrenbind_q4",
     cost = 20,
-    calculate = charge_logic,
     added_to_deck = init_logic,
     remove_from_deck = init_logic, 
     use=function(card)
@@ -126,7 +124,6 @@ local D6 = {
     cost = 20,
     added_to_deck = init_logic,
     remove_from_deck = init_logic,
-    calculate = charge_logic,
     use = function(card)
         if #card.area.highlighted > 2 then
             play_sound("wrenbind_error_buzz")
@@ -204,7 +201,6 @@ local ED6 = {
     cost = 20,
     added_to_deck = init_logic,
     remove_from_deck = init_logic,
-    calculate = charge_logic,
     use = function(card)
         if #card.area.highlighted > 2 then
             play_sound("wrenbind_error_buzz")
@@ -299,7 +295,6 @@ local D4 = {
     cost = 20,
     added_to_deck = init_logic,
     remove_from_deck = init_logic,
-    calculate = charge_logic,
     loc_vars = function(self, info_queue, center)
 		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
 	end,

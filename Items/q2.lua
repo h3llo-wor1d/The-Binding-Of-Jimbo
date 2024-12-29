@@ -38,7 +38,6 @@ local IVBag = {
     cost = 8,
     added_to_deck = init_logic,
     remove_from_deck = init_logic,
-    calculate = charge_logic,
     use = function(card)
         if G.GAME and G.GAME.blind and G.GAME.blind.in_blind then
             play_sound("wrenbind_blood_use", 1, 1)
