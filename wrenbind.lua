@@ -38,13 +38,13 @@ function is_battery()
     return false
 end
 
-function charge_logic(card, add)
+function charge_logic(card, add, is_mega)
     local charges = card.ability.extra.charges
     local charge_max = card.ability.extra.charge_max
     if add == nil then add = 1 end
     charges = charges + add 
 
-    if is_battery() then
+    if is_battery() or is_mega then
         if charges > (charge_max * 2) and add ~= 1 then charges = charge_max * 2 end
         if charges < (card.ability.extra.charge_max*2) then
             play_sound("wrenbind_active_charge", 1, 1)
