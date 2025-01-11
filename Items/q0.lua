@@ -34,36 +34,10 @@ local CursedEye = {
         end
     end
 }
-
-local Quarter = {
-    object_type="Joker",
-    name="wrenbind_quarter",
-    key="quarter",
-    loc_txt={
-        name="A Quarter",
-        text = {
-            "Gives {C:green}$25{} when sold",
-        }
-    },
-    atlas = "atlasone",
-    pos = { x = 0, y = 0 },
-    rarity = "wrenbind_q0",
-    cost = 0,
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_devilpool" }
-	end,
-    calculate = function(self, card, context)
-        if context.selling_self then
-            ease_dollars(25)
-        end
-    end
-}
-
 return {
     name = "Quality 0 Jokers",
     quality = "q0",
     items = {
-        CursedEye,
-        Quarter
+        CursedEye
     }
 }

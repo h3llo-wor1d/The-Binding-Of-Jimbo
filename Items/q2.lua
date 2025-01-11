@@ -15,10 +15,8 @@ local TheBattery = {
     cost = 8
 }
 
-local IVBag = {
-    object_type="Joker",
-    name="wrenbind_ivbag",
-    key="ivbag",
+local IVBag = WrenBind.ActiveJoker({
+    name="ivbag",
     loc_txt={
         name="IV Bag",
         text = {
@@ -32,12 +30,10 @@ local IVBag = {
         return {vars = {(G.GAME.probabilities.normal-1)}}
 	end,
     atlas = "atlasone",
-    config = {extra = {charges = 1, charge_max = 1}},
-    pos = { x = 0, y = 0, extra = {x = 1, y = 4, atlas="wrenbind_charge"} },
+    charges=1,
+    pos = { x = 0, y = 0 },
     rarity = "wrenbind_q2",
     cost = 8,
-    added_to_deck = init_logic,
-    remove_from_deck = init_logic,
     use = function(card)
         if G.GAME and G.GAME.blind and G.GAME.blind.in_blind then
             play_sound("wrenbind_blood_use", 1, 1)
@@ -59,7 +55,7 @@ local IVBag = {
         play_sound("wrenbind_error_buzz")
         return true
     end
-}
+})
 
 
 

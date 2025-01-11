@@ -1,8 +1,20 @@
 local mod_path = SMODS.current_mod.path
 Wrenbind_config = SMODS.current_mod.config
 
-print("INIT WRENBIND")
-WrenBind = {util = nil, pills_order = nil}
+WrenBind = {
+    util = nil, pills_order = nil, 
+    special_jokers = {
+        j_wrenbind_holymantle = "Angel",
+        j_wrenbind_brimstone = "Devil",
+        j_wrenbind_coallump = "Devil",
+        j_wrenbind_quarter = "Devil"
+    }, chances = {
+        devil = 0,
+        angel = 0
+    }, 
+    ante = 1, 
+    has_devil = false
+}
 
 WrenBind.find_joker = function(card)
     for i=1, #G.jokers.cards do if G.jokers.cards[i].config.center.name == card then return i end end
@@ -113,40 +125,8 @@ SMODS.Atlas({
 	py = 34,
 }):register()
 
--- register pills atlas
--- pills will be added in a future version of The Binding of Jimbo.
-
---[[SMODS.Atlas({
-	key = "atlaspills",
-	path = "atlaspills.png",
-	px = 71,
-	py = 95,
-}):register()
-
-SMODS.ConsumableType{
-	key = "WrenPills",
-	primary_colour = G.C.MONEY,
-	secondary_colour = G.C.MONEY,
-	collection_rows = { 4, 5 },
-	loc_txt = {
-        collection = "Pills",
-        name = "Pills",
-        undiscovered = {
-            name = "Pill",
-            text = {"Effect Unknown"}
-        }
-    },
-    shop_rate = 1
-}
-
-SMODS.UndiscoveredSprite{
-    key = 'WrenPills', --must be the same key as the consumabletype
-    atlas = 'atlaspills',
-    pos = {x = 0, y = 0}
-}]]
-
 WrenBind.util = SMODS.load_file("api/util.lua")()
-WrenBind.pill_order = WrenBind.util.scramble(0,10)
+SMODS.load_file("core/WrenbindCore.lua")().init()
 
 local function calc_weight(pool)
     local x = 0
@@ -311,43 +291,7 @@ for set, objs in pairs(WrenBind.obj_buffer) do
 	end
 end
 
--- active item overrides
--- this was going to be too big for one file, so to save my eyes and everyone else's, it is now stored elsewhere.
 local G_UIDEF_use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
-
---[[function G.FUNCS.can_roll_selected(e)
-    local area = e.config.ref_table.area
-    local mergable = 0
-    for i = 1, #area.highlighted do
-        if area.highlighted[i].ability.extra and type(area.highlighted[i].ability.extra) == "table" and area.highlighted[i].ability.extra.can_select then
-            mergable = mergable + 1
-            active_select_card = area.highlighted[i]
-        end
-    end
-    if mergable == 1 then
-        e.config.colour = G.C.DARK_EDITION
-        e.config.button = "use_select_active"
-    else
-        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
-        e.config.button = nil
-    end
-end]]
-
---[[function G.FUNCS.use_select_active(e)
-    e.config.ref_table.area:remove_from_highlighted(e.config.ref_table)
-    G.E_MANAGER:add_event(Event({
-        trigger = "after",
-        delay = 1,
-        func = function()
-            local area = e.config.ref_table.area
-            area:remove_card(e.config.ref_table)
-            active_select_card:use()
-            e.config.ref_table:remove()
-            e.config.ref_table = nil
-            return true
-        end,
-    }))
-end]]
 
 function G.UIDEF.use_and_sell_buttons(card)
     local m = G_UIDEF_use_and_sell_buttons_ref(card)  
@@ -405,23 +349,60 @@ function G.UIDEF.use_and_sell_buttons(card)
     return m
 end
 
--- overrides borrowed with permission from aura to allow for the charge sprites to be drawn over the jokers.
--- todo: these are not drawn over joker shaders for some reason?
 local css = Card.set_sprites
 function Card:set_sprites(c, f)
     css(self, c,f)
     if self.config.center and self.config.center.pos and self.config.center.pos.extra and self.config.center.pos.extra.atlas then
-        if not self.children.front then
-            self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[self.config.center.pos.extra.atlas], self.config.center.pos)
-            self.children.front.states.hover = self.states.hover
-            self.children.front.states.click = self.states.click
-            self.children.front.states.drag = self.states.drag
-            self.children.front.states.collide.can = false
-            self.children.front:set_role({major = self, role_type = 'Glued', draw_major = self})
+        if not self.children.charges then
+            self.children.charges = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[self.config.center.pos.extra.atlas])
+            self.children.charges.states.hover = self.states.hover
+            self.children.charges.states.click = self.states.click
+            self.children.charges.states.drag = self.states.drag
+            self.children.charges.states.collide.can = false
+            self.children.charges:set_role({major = self, role_type = 'Glued', draw_major = self})
         else
-            self.children.front:set_sprite_pos(self.config.center.pos.extra)
+            self.children.charges:set_sprite_pos(self.config.center.pos.extra)
         end
     end
+end
+
+local old_reset = reset_blinds
+function reset_blinds()
+    if G.GAME.round_resets.blind_states.Boss == 'Defeated' then
+        WrenBind.ante = WrenBind.ante + 1
+        if (WrenBind.ante == 2) then
+            WrenBind.chances.devil = 1.0
+        end
+        if WrenBind.chances.devil ~= 1 and WrenBind.chances.angel ~= 1 and WrenBind.ante ~= 2 then
+            if not WrenBind.has_devil then
+                WrenBind.chances.angel = WrenBind.chances.angel + 0.15
+            else
+                WrenBind.chances.devil = WrenBind.chances.devil + 0.15
+            end
+        end
+    end
+    old_reset()
+end
+
+local old_pack = get_pack
+
+function get_pack(_key, _type)
+    local chance = pseudorandom(pseudoseed(_key))
+    if (chance ~= 0) then
+        if (chance <= WrenBind.chances.devil) then
+            WrenBind.chances.devil = 0
+            WrenBind.chances.angel = 0
+            play_sound("wrenbind_devilappear", 1, 0.5)
+            return G.P_CENTERS['p_wrenbind_devil_'..1]--(math.random(1, 2))
+            
+        elseif (chance <= WrenBind.chances.angel) then
+            WrenBind.chances.devil = 0
+            WrenBind.chances.angel = 0
+            play_sound("wrenbind_angelappear", 1, 0.5)
+            return G.P_CENTERS['p_wrenbind_angel_'..1]
+        end
+    end
+    return old_pack(_key, _type)
 end
 
 local cd = Card.draw
@@ -560,33 +541,5 @@ G.FUNCS.cycle_update = function(args)
         args.cycle_config.ref_table[args.cycle_config.ref_value] = args.to_key
     end
 end
--- Is not working? I don't know why...
-SMODS.current_mod.config_tab = function()
-    return {
-        n=G.UIT.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, 
-        nodes={
-            create_option_cycle({
-                label="Which Version Are You Playing?", 
-                ref_table=Wrenbind_config, 
-                ref_value="IsaacVersion", 
-                options={
-                    1,
-                    2,
-                    3,
-                    4,
-                    5
-                },
-                current_option=Wrenbind_config.IsaacVersion,
-                callback="cycle_update"
-            }),
-            create_option_cycle({
-                label="Choose Your Isaac Save File",
-                ref_table=Wrenbind_config, 
-                current_option=Wrenbind_config.IsaacSaveFileNum,
-                ref_value="IsaacSaveFileNum", 
-                options={1,2,3},
-                callback="cycle_update"
-            }),
-        }
-    }
-end
+
+-- todo: force skip banned pools unless if they are forced pools (i.e. no angel items unless if we forced angel pool)

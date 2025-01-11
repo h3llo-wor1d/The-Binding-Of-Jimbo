@@ -1,7 +1,5 @@
-local D12 = {
-    object_type = "Joker",
-    name = "wrenbind_d12",
-    key = "d12",
+local D12 = WrenBind.ActiveJoker({
+    name="d12",
     loc_txt = {
         name = "D12",
         text = {
@@ -9,17 +7,12 @@ local D12 = {
             "for the current Ante."
         }
     },
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
-	end,
-    config = {extra = {charges = 3, charge_max = 3}}, 
+    charges=3,
     atlas = "atlasone",
-    pos = { x = 5, y = 0, extra = {x = 3, y = 2, atlas="wrenbind_charge"} },
+    pos = { x = 5, y = 0 },
     soul_pos = { x = 6, y = 0 },
     rarity = "wrenbind_q2",
     cost = 16,
-    added_to_deck = init_logic,
-    remove_from_deck = init_logic, 
     use = function(card)
         local new_charges = card.ability.extra.charges-card.ability.extra.charge_max
         card.ability.extra.charges = new_charges
@@ -29,12 +22,10 @@ local D12 = {
         WrenBind.util.reroll_tags()
         return true
     end
-}
+})
 
-local D20 = {
-    object_type = "Joker",
-    name = "wrenbind_d20",
-    key = "d20",
+local D20 = WrenBind.ActiveJoker({
+    name="d20",
     loc_txt = {
         name = "D20",
         text = {
@@ -43,17 +34,12 @@ local D20 = {
             "{C:attention}their edition intact{}."
         }
     },
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
-	end,
-    config = {extra = {charges = 4, charge_max = 4}}, 
+    charges=4,
     atlas = "atlasone",
-    pos = { x = 1, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"} },
+    pos = { x = 1, y = 0 },
     soul_pos = { x = 2, y = 0 },
     rarity = "wrenbind_q4",
     cost = 20,
-    added_to_deck = init_logic,
-    remove_from_deck = init_logic, 
     use=function(card)
         if #G.consumeables.cards == 0 then
             WrenBind.util.alert_dice(card, "Nothing to roll!", 0.65)
@@ -90,18 +76,14 @@ local D20 = {
             -- borrowed from my missingno mod
         end
     end
-    
-}
-
+})
 
 local function find_joker(card)
     for i=1, #G.jokers.cards do if G.jokers.cards[i].config.center.name == card then return i end end
 end
 
-local D6 = {
-    object_type = "Joker",
-    name = "wrenbind_d6",
-    key = "d6",
+local D6 = WrenBind.ActiveJoker({
+    name = "d6",
     loc_txt = {
         name = "The D6",
         text = {
@@ -110,20 +92,12 @@ local D6 = {
             "{C:attention}rarity and edition{}."
         }
     },
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
-	end,
-    eternal_compat = true,
     atlas = "atlasone",
-    config = {
-        extra = {charges = 4, charge_max = 4},
-    },
-    pos = { x = 8, y = 0, extra = {x = 4, y = 1, atlas="wrenbind_charge"}},
+    charges=4,
+    pos = { x = 8, y = 0},
     soul_pos = {x = 9, y = 0},
     rarity = "wrenbind_q4",
     cost = 20,
-    added_to_deck = init_logic,
-    remove_from_deck = init_logic,
     use = function(card)
         if #card.area.highlighted > 2 then
             play_sound("wrenbind_error_buzz")
@@ -168,16 +142,12 @@ local D6 = {
         G.jokers:emplace(c)
         temp:remove()
         G.jokers:remove_card(temp)
-        table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))
-        
-        
+        table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))  
     end
-}
+})
 
-local ED6 = {
-    object_type = "Joker",
-    name = "wrenbind_ed6",
-    key = "ed6",
+local ED6 = WrenBind.ActiveJoker({
+    name = "ed6",
     loc_txt = {
         name = "Eternal D6",
         text = {
@@ -192,15 +162,11 @@ local ED6 = {
         return {vars = {G.GAME.probabilities.normal}}
 	end,
     atlas = "atlasone",
-    config = {
-        extra = {charges = 2, charge_max = 2},
-    },
-    eternal_compat = true,
-    pos = { x = 0, y = 0, extra = {x = 2, y = 3, atlas="wrenbind_charge"}},
+    charges=2,
+    pos = { x = 3, y = 1},
+    soul_pos = {x = 4, y = 1},
     rarity = "wrenbind_q3",
     cost = 20,
-    added_to_deck = init_logic,
-    remove_from_deck = init_logic,
     use = function(card)
         if #card.area.highlighted > 2 then
             play_sound("wrenbind_error_buzz")
@@ -273,12 +239,10 @@ local ED6 = {
             table.insert(G.jokers.cards, index, table.remove(G.jokers.cards,#G.jokers.cards))
         end
     end
-}
+})
 
-local D4 = {
-    object_type = "Joker",
-    name = "wrenbind_d4",
-    key = "d4",
+local D4 = WrenBind.ActiveJoker({
+    name = "d4",
     loc_txt = {
         name = "D4",
         text = {
@@ -288,16 +252,11 @@ local D4 = {
         }
     },
     atlas = "atlasone",
-    config = {extra = {charges = 5, charge_max = 5}},
-    pos = { x = 3, y = 0, extra = {x = 5, y = 0, atlas="wrenbind_charge"} },
+    charges=5,
+    pos = { x = 3, y = 0},
     soul_pos = { x = 4, y = 0 },
     rarity = "wrenbind_q4",
     cost = 20,
-    added_to_deck = init_logic,
-    remove_from_deck = init_logic,
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
-	end,
     use = function(card)
         if #G.jokers.cards-1 == 0 then
             WrenBind.util.alert_dice(card, "Nothing to roll!", 0.65)
@@ -344,7 +303,7 @@ local D4 = {
         card.ability.extra.can_roll = false
         return true
     end
-}
+})
 
 return {
     name = "Dice Jokers",

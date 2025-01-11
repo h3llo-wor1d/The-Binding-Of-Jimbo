@@ -116,41 +116,6 @@ local Polyphemus = {
     end
 }
 
-local Brimstone = {
-    object_type = "Joker",
-    name = "wrenbind_brimstone",
-    key = "brimstone",
-    loc_txt = {
-        name = "Brimstone",
-        text = {
-            "Gives {X:mult,C:white}x6{} mult for every",
-            "card scored. {X:mult,C:white}-1x{} mult",
-            "per card scored until {X:mult,C:white}1x{}."
-        }
-    },
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_devilpool" }
-	end,
-    atlas = "atlasone",
-    pos = { x = 0, y = 0 },
-    rarity = "wrenbind_q4",
-    config = {extra = {count = -1}},
-    cost = 30,
-    calculate = function(self, card, context)
-        if context.cardarea == G.jokers and context.after then
-            card.ability.extra.count = -1
-        end
-        if context.individual and context.cardarea == G.play then
-            card.ability.extra.count = card.ability.extra.count + 1
-            if (6-card.ability.extra.count <= 0) == false then 
-                return {
-                    x_mult = 6-card.ability.extra.count,
-                    card = context.other_card
-                }
-            end
-        end 
-    end
-}
 
 local GFuel = {
     object_type = "Joker",
@@ -212,42 +177,11 @@ local GFuel = {
     end
 }
 
-local HolyMantle = {
-    object_type = "Joker",
-    name = "wrenbind_holymantle",
-    key = "holymantle",
-    loc_txt = {
-        name = "Holy Mantle",
-        text = {
-            "Prevents {C:attention}Game Over{} giving",
-            "{C:attention}+1{} Hand and {C:attention}+1{} Discard to",
-            "finish the blind, {C:attention}once{} per Blind."
-        }
-    },
-    atlas = "atlasone",
-    pos = { x = 0, y = 0},
-    rarity = "wrenbind_q4",
-    config = {
-        extra = {active=true}
-    },
-    cost = 20,
-    loc_vars = function(self, info_queue, center)
-		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_angelpool" }
-	end,
-    calculate = function(self, card, context)
-        if context.end_of_round and not context.game_over and not context.repetition and not context.blueprint and not context.individual then
-            card.ability.extra.active = true
-        end
-    end
-}
-
 return {
     name = "Quality 4 Jokers",
     quality = "q4",
     items = {
         Polyphemus,
-        GFuel,
-        Brimstone,
-        HolyMantle
+        GFuel
     }
 }

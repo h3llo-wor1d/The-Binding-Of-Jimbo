@@ -2,23 +2,21 @@
     {
         "title": "New Mechanics",
         "changes": [
-            "Added global probabilities to ED6 and IV Bag",
-            "Added Lil' + Mega Battery as consumeable tarot cards",
-            "Began work on adding devil/angel deal mechanics"
+            "Added Devil/Angel Pack, which spawn upon completing boss blinds"
         ]
     },
     {
         "title": "Other Changes",
         "changes": [
-            "Added item descriptions for (almost) everything",
-            "Added blueprint compat for Polyphemus and Cursed Eye."
+            "Added some missing sprites",
+            "Removed lost deck due to bugs",
+            "Began work on custom core library"
         ]
     },
     {
         "title": "Bug Fixes",
         "changes": [
-            "Minor bugfixes and optimizations",
-            "Fixed holy mantle. Lost deck is now complete (minus spriting)."
+            "Fixed minor visual bug with charge bars"
         ]
     }
 ]

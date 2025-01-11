@@ -3,6 +3,20 @@
 return {
     descriptions = {
         Other = {
+            p_wrenbind_angel_1 = {
+                name = "Angel Pack",
+                text = {
+                    "Choose {C:attention}#1#{} of",
+                    "up to {C:attention}#2# Angel Jokers{}",
+                },
+            },
+            p_wrenbind_devil_1 = {
+                name = "Devil Pack",
+                text = {
+                    "Choose {C:attention}#1#{} of",
+                    "up to {C:attention}#2# Devil Jokers{}",
+                },
+            },
             wrenbind_angelpool = {
                 name = "Angel Joker",
                 text = {
@@ -24,6 +38,12 @@ return {
                     "{C:gold}Charges{} to use."
                 }
             }
-        }
+        },
+    },
+    misc = {
+        dictionary = {
+            k_wrenbind_angel_pack = "Angel Pack",
+            k_wrenbind_devil_pack = "Devil Pack",
+        },
     }
 }
