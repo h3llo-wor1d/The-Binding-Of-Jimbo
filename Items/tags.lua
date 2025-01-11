@@ -39,6 +39,6 @@ local LazyTag = {
 return {
     name = "Tags",
     items = {
-        LazyTag
+        --LazyTag this still doesn't work, i should've removed this
     }
 }

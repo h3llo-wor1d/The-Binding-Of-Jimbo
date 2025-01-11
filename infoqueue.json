@@ -10,7 +10,8 @@
         "changes": [
             "Added some missing sprites",
             "Removed lost deck due to bugs",
-            "Began work on custom core library"
+            "Began work on custom core library",
+            "Temporarily removed Lazy Tag because it's not working yet"
         ]
     },
     {
