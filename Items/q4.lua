@@ -8,6 +8,8 @@ local function gfuels()
     return counter
 end
 
+to_big = to_big or function(n) return n end
+
 local GFUEL_FLAVORS = {
     "HUMOR UP!",
     "G UP!",
@@ -177,11 +179,103 @@ local GFuel = {
     end
 }
 
+local RockBottom = {
+    object_type = "Joker",
+    name = "wrenbind_rbottom",
+    key = "rbottom",
+    loc_txt = {
+        name = "Rock Bottom",
+        text = {
+            "All Stats are permanently",
+            "their max value throughout",
+            "the current run.",
+            "{s:0.7}{C:mult}Mult #1# {}{C:grey}~ {}{C:chips}Chips #2# {}{C:grey}~{}{C:attention} Luck #3# {}{C:grey}~{}{C:green} Money #4#{}"
+        }
+    },
+    loc_vars = function(self,info_queue,card)
+        return { vars = { card.ability.extra.mult.d, card.ability.extra.chips.d, card.ability.extra.luck, card.ability.extra.money } }
+    end,
+    atlas = "atlasone",
+    pos={ x=0, y=0},
+    rarity="wrenbind_q4",
+    cost=20,
+    config = {
+        extra = {
+            luck = 0,
+            mult = {
+                r = 0,
+                d = 0
+            },
+            chips = {
+                r = 0,
+                d = 0
+            },
+            money = 0,
+            discards = 0,
+            hands = 0
+        }
+    },
+    added_to_deck = function(self,card,context)
+        if not from_debuff and G.STAGE == G.STAGES.RUN and not G.screenwipe then
+            -- Save max stats when gained
+            card.ability.extra.discards = G.GAME.round_resets.discards
+            card.ability.extra.hands = G.GAME.round_resets.hands
+        end
+    end,
+    remove_from_deck = function(self,card,context)
+        G.GAME.probabilities.normal = G.GAME.probabilities.real
+    end,
+    calculate = function(self,card,context)
+        if context.stat_changed then
+            if context.stat_changed.name == "luck" then
+                if G.GAME.probabilities.real > G.GAME.probabilities.normal then
+                    card.ability.extra.luck = G.GAME.probabilities.real
+                    G.GAME.probabilities.normal = G.GAME.probabilities.real
+                end
+            end
+            if context.stat_changed.name == "money" then
+                if context.stat_changed.value > card.ability.extra.money then
+                    card.ability.extra.money = context.stat_changed.value
+                end
+            end
+        end
+
+        -- Mult/Chip logic (shouldn't be a problem to auto-check for tables since this mod lists talisman as a requirement...?)
+        if context.cardarea == G.jokers and not context.before and not context.after and not context.debuffed_hand and hand_chips and mult then
+            local has_changed_values = false
+
+            if type(card.ability.extra.mult.r) ~= "table" or mult > card.ability.extra.mult.r then
+                card.ability.extra.mult.d = mult:to_number()
+                card.ability.extra.mult.r = mult
+            else
+                has_changed_values = true
+                mult = mod_mult(card.ability.extra.mult.r)
+            end
+
+            if type(card.ability.extra.chips.r) ~= "table" or hand_chips > card.ability.extra.chips.r then
+                card.ability.extra.chips.d = hand_chips:to_number()
+                card.ability.extra.chips.r = hand_chips
+            else
+                has_changed_values = true
+                hand_chips = mod_mult(card.ability.extra.chips.r)
+            end  
+
+            if has_changed_values then
+                update_hand_text({ delay = 0 }, { mult = card.ability.extra.mult.r, chips = card.ability.extra.chips.r })
+                return {
+                    message = "Min/Maxed!"
+                }
+            end   
+        end
+    end
+}
+
 return {
     name = "Quality 4 Jokers",
     quality = "q4",
     items = {
         Polyphemus,
-        GFuel
+        GFuel,
+        RockBottom
     }
 }

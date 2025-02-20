@@ -148,7 +148,7 @@ SMODS.Rarity {
         name = "Quality 4"
     },
     badge_colour = HEX('ffd100'),
-    default_weight = 0.075,
+    default_weight = 0.065,
     pools = {["Joker"] = true},
     get_weight = function(self, weight, object_type)
         return calc_weight(WrenBind.q4)
@@ -160,7 +160,7 @@ SMODS.Rarity {
     loc_txt = {
         name = "Quality 3"
     },
-    default_weight=0.085,
+    default_weight=0.075,
     badge_colour = HEX('ff54ec'),
     pools = {["Joker"] = true},
     get_weight = function(self, weight, object_type)
@@ -173,11 +173,24 @@ SMODS.Rarity {
     loc_txt = {
         name = "Quality 2"
     },
-    default_weight=0.095,
+    default_weight=0.085,
     badge_colour = HEX('65d5ff'),
     pools = {["Joker"] = true},
     get_weight = function(self, weight, object_type)
         return calc_weight(WrenBind.q2)
+    end,
+}
+
+SMODS.Rarity {
+    key = "q1",
+    loc_txt = {
+        name = "Quality 1"
+    },
+    default_weight = 0.095,
+    badge_colour = HEX("90FF51"),
+    pools = {["Joker"] = true},
+    get_weight = function(self, weight, object_type)
+        return calc_weight(WrenBind.q1)
     end,
 }
 
@@ -534,6 +547,32 @@ function Game:update_new_round(dt)
         end_round()
     end
 end
+
+SMODS.Joker:take_ownership('oops', {
+    add_to_deck = function(self,card,from_debuff)
+        if not from_debuff and G.STAGE == G.STAGES.RUN and not G.screenwipe then
+            if WrenBind.util.has_joker("j_wrenbind_rbottom") then
+                G.GAME.probabilities.real = G.GAME.probabilities.real * 2
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i].config.center.key == "j_wrenbind_rbottom" then
+                        G.jokers.cards[i]:calculate_joker({stat_changed = { name = "luck", value=nil }})
+                    end
+                end
+            else
+                G.GAME.probabilities.real = G.GAME.probabilities.real * 2
+                G.GAME.probabilities.normal = G.GAME.probabilities.normal * 2
+            end
+        end
+    end,
+    remove_from_deck = function(self,card,from_debuff)
+        if WrenBind.util.has_joker("j_wrenbind_rbottom") then
+            G.GAME.probabilities.real = G.GAME.probabilities.real/2
+        else
+            G.GAME.probabilities.real = G.GAME.probabilities.real/2
+            G.GAME.probabilities.normal = G.GAME.probabilities.normal/2
+        end
+    end
+})
 
 G.FUNCS.cycle_update = function(args)
     args = args or {}

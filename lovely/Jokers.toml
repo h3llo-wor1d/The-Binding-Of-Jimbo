@@ -1,0 +1,18 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = -1
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = '''
+if self.ability.name == 'Oops! All 6s' then
+    for k, v in pairs(G.GAME.probabilities) do 
+        G.GAME.probabilities[k] = v*2
+    end
+end
+'''
+position = "at"
+payload = ''''''
+match_indent = true

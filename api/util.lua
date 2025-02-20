@@ -36,6 +36,25 @@ local function scramble(min, max)
     return scrambled
 end
 
+local function has_joker(j_key)
+    for i=1, #G.jokers.cards do
+        print(G.jokers.cards[i].config.center.key)
+        if G.jokers.cards[i].config.center.key == j_key then
+            return true
+        end
+    end
+    return false
+end
+
+local function find_joker(j_key)
+    for i=1, #G.jokers.cards do
+        if G.jokers.cards[i].config.center.name == j_key then
+            return G.jokers.cards[i]
+        end
+    end
+    return false
+end
+
 local function reroll_tags ()
     G.GAME.round_resets.blind_tags.Small = get_next_tag_key()
     G.GAME.round_resets.blind_tags.Big = get_next_tag_key()
@@ -103,6 +122,8 @@ return {
     play_foley = play_foley,
     reroll_tags = reroll_tags,
     scramble = scramble,
-    deck_joker = deck_joker
+    deck_joker = deck_joker,
+    has_joker = has_joker,
+    find_joker = find_joker
 }
  

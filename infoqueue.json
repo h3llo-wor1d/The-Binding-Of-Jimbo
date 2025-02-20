@@ -2,22 +2,20 @@
     {
         "title": "New Mechanics",
         "changes": [
-            "Added Devil/Angel Pack, which spawn upon completing boss blinds"
+            "Added Rock Bottom, Yum Heart, and D1",
+            "Note: Rock Bottom is not completed yet in terms of Cash, but everything else works."
         ]
     },
     {
         "title": "Other Changes",
         "changes": [
-            "Added some missing sprites",
-            "Removed lost deck due to bugs",
-            "Began work on custom core library",
-            "Temporarily removed Lazy Tag because it's not working yet"
+            "Added Talisman as a dependency for calculating mult/chips with rock bottom."
         ]
     },
     {
         "title": "Bug Fixes",
         "changes": [
-            "Fixed minor visual bug with charge bars"
+            "Minor changes fix older bugs."
         ]
     }
 ]

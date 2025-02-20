@@ -1,0 +1,33 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = -1
+
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = '''
+probabilities = {
+    normal = 1,
+},
+'''
+position = "at"
+payload = '''
+probabilities = {
+    normal = 1,
+    real = 1,
+},
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = 'G.GAME.dollars = G.GAME.dollars + mod'
+position = "before"
+payload = '''
+for i=1, #G.jokers.cards do 
+    G.jokers.cards[i]:calculate_joker({stat_changed = {name = "money", value=mod}})
+end
+'''
+match_indent = true

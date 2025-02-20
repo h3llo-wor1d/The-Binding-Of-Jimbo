@@ -1,3 +1,8 @@
+function round(num, numDecimalPlaces)
+    local mult = 10^(numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
+end
+
 local D12 = WrenBind.ActiveJoker({
     name="d12",
     loc_txt = {
@@ -305,6 +310,61 @@ local D4 = WrenBind.ActiveJoker({
     end
 })
 
+local D1 = WrenBind.ActiveJoker({
+    name = "d1",
+    loc_txt = {
+        name = "D1",
+        text = {
+            "Duplicate a random consumeable.",
+            "{C:green}#1# in 4{} chance to create a",
+            "different consumeable from",
+            "the same pool."
+        }
+    },
+    loc_vars = function(self, info_queue, center)
+		info_queue[#info_queue + 1] = { set = "Other", key = "wrenbind_activejoker" }
+        return {vars = {G.GAME.probabilities.normal}}
+	end,
+    atlas = "atlasone",
+    charges=2,
+    pos = { x = 0, y = 0},
+    rarity = "wrenbind_q2",
+    cost = 15,
+    use = function(card)
+        if #G.consumeables.cards == 0 then
+            play_sound("wrenbind_error_buzz")
+            WrenBind.util.alert_dice(card, "No consumeables to copy!", 1)
+            return true
+        end
+        if #G.consumeables.cards == G.consumeables.config.card_limit then
+            play_sound("wrenbind_error_buzz")
+            WrenBind.util.alert_dice(card, "No space for consumeable!", 1)
+            return true
+        end
+        local new_charges = card.ability.extra.charges-card.ability.extra.charge_max
+        card.ability.extra.charges = new_charges
+        card.config.center.pos.extra.x = new_charges
+        WrenBind.util.alert_dice(card, "Roll!", 0.75)
+        WrenBind.util.play_foley("dice", 1)
+
+        local selected_card = pseudorandom_element(G.consumeables.cards, pseudoseed('d1_select_cards'))
+        G.GAME.consumeable_buffer = 1
+
+        if round(pseudorandom('d1_logic'), 2) <= G.GAME.probabilities.normal/4 then
+            c = create_card(selected_card.ability.set, G.consumeables, nil, nil, nil, nil, nil, "wbindd1")
+            c:add_to_deck()
+            G.consumeables:emplace(c)
+            
+        else
+            c = create_card(selected_card.ability.set, G.consumeables, nil, nil, nil, nil, selected_card.config.center.key, "wbindd1")
+            c:add_to_deck()
+            G.consumeables:emplace(c)
+        end
+        G.GAME.consumeable_buffer = 0
+        return true
+    end
+})
+
 return {
     name = "Dice Jokers",
     items = {
@@ -312,6 +372,7 @@ return {
         D4,
         D12,
         D6,
-        ED6
+        ED6,
+        D1
     }
 }

@@ -9,6 +9,6 @@
 	"priority": 99999999,
 	"badge_colour": "",
 	"badge_text_colour": "",
-	"version": "0.3a",
-	"dependencies": ["Steamodded(>=1.0.0~ALPHA-0917a)"]
+	"version": "0.4a",
+	"dependencies": ["Steamodded(>=1.0.0~ALPHA-0917a)", "Talisman(>=2.0.0-beta8<=2.0.9)"]
 }
