@@ -1,6 +1,11 @@
 local mod_path = SMODS.current_mod.path
 Wrenbind_config = SMODS.current_mod.config
 
+SMODS.Shader {
+    key = "tmtrainer",
+    path = "tmtrainer.fs"
+}
+
 WrenBind = {
     util = nil, pills_order = nil, 
     special_jokers = {
